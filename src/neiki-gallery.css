@@ -1,0 +1,675 @@
+/* ==========================================================================
+   Neiki Gallery — CSS
+   A vanilla JS image gallery/lightbox library.
+   https://github.com/neiki-gallery
+
+   All styles use the .neiki- prefix and CSS custom properties (--neiki-*)
+   for easy theming. No external dependencies.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. CSS Custom Properties (Theming)
+   -------------------------------------------------------------------------- */
+
+:root {
+  /* Grid */
+  --neiki-columns: 4;
+  --neiki-gap: 12px;
+  --neiki-border-radius: 6px;
+
+  /* Overlay / Lightbox */
+  --neiki-overlay-bg: rgba(0, 0, 0, 0.92);
+  --neiki-lightbox-max-width: 90vw;
+  --neiki-lightbox-max-height: 85vh;
+
+  /* Controls */
+  --neiki-btn-size: 48px;
+  --neiki-btn-bg: rgba(255, 255, 255, 0.12);
+  --neiki-btn-bg-hover: rgba(255, 255, 255, 0.25);
+  --neiki-btn-color: #fff;
+  --neiki-btn-border-radius: 50%;
+
+  /* Text */
+  --neiki-caption-color: #fff;
+  --neiki-caption-font-size: 15px;
+  --neiki-counter-color: rgba(255, 255, 255, 0.7);
+  --neiki-counter-font-size: 13px;
+
+  /* Thumbnails */
+  --neiki-thumb-size: 56px;
+  --neiki-thumb-gap: 6px;
+  --neiki-thumb-border-radius: 4px;
+  --neiki-thumb-active-border: 2px solid #fff;
+  --neiki-thumb-opacity: 0.5;
+  --neiki-thumb-active-opacity: 1;
+
+  /* Spinner */
+  --neiki-spinner-size: 40px;
+  --neiki-spinner-color: #fff;
+  --neiki-spinner-width: 3px;
+
+  /* Transitions */
+  --neiki-transition-duration: 0.3s;
+  --neiki-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Zoom */
+  --neiki-zoom-scale: 2;
+}
+
+/* --------------------------------------------------------------------------
+   2. Dark / Light Theme Overrides
+   -------------------------------------------------------------------------- */
+
+/* Dark theme (default) */
+[data-theme="dark"],
+.neiki-gallery[data-theme="dark"] {
+  --neiki-overlay-bg: rgba(0, 0, 0, 0.92);
+  --neiki-btn-bg: rgba(255, 255, 255, 0.12);
+  --neiki-btn-bg-hover: rgba(255, 255, 255, 0.25);
+  --neiki-btn-color: #fff;
+  --neiki-caption-color: #fff;
+  --neiki-counter-color: rgba(255, 255, 255, 0.7);
+  --neiki-spinner-color: #fff;
+  --neiki-thumb-active-border: 2px solid #fff;
+}
+
+/* Light theme */
+[data-theme="light"],
+.neiki-gallery[data-theme="light"] {
+  --neiki-overlay-bg: rgba(255, 255, 255, 0.96);
+  --neiki-btn-bg: rgba(0, 0, 0, 0.08);
+  --neiki-btn-bg-hover: rgba(0, 0, 0, 0.16);
+  --neiki-btn-color: #222;
+  --neiki-caption-color: #222;
+  --neiki-counter-color: rgba(0, 0, 0, 0.55);
+  --neiki-spinner-color: #222;
+  --neiki-thumb-active-border: 2px solid #222;
+}
+
+/* --------------------------------------------------------------------------
+   3. Gallery Grid — Masonry Layout (CSS Columns)
+   -------------------------------------------------------------------------- */
+
+.neiki-gallery {
+  box-sizing: border-box;
+}
+
+.neiki-gallery *,
+.neiki-gallery *::before,
+.neiki-gallery *::after {
+  box-sizing: inherit;
+}
+
+.neiki-gallery--masonry {
+  column-count: var(--neiki-columns, 4);
+  column-gap: var(--neiki-gap, 10px);
+}
+
+.neiki-gallery--masonry > a,
+.neiki-gallery--masonry > .neiki-item {
+  display: inline-block;
+  width: 100%;
+  margin-bottom: var(--neiki-gap, 10px);
+  break-inside: avoid;
+  border-radius: var(--neiki-border-radius, 6px);
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+}
+
+.neiki-gallery--masonry > a > img,
+.neiki-gallery--masonry > .neiki-item > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--neiki-border-radius, 6px);
+  transition: transform var(--neiki-transition-duration) var(--neiki-transition-easing),
+              opacity var(--neiki-transition-duration) var(--neiki-transition-easing);
+  opacity: 0;
+}
+
+.neiki-gallery--masonry > a > img.neiki-loaded,
+.neiki-gallery--masonry > .neiki-item > img.neiki-loaded {
+  opacity: 1;
+}
+
+.neiki-gallery--masonry > a:hover > img,
+.neiki-gallery--masonry > .neiki-item:hover > img {
+  transform: scale(1.03);
+}
+
+/* --------------------------------------------------------------------------
+   4. Gallery Grid — Uniform Grid Layout (CSS Grid)
+   -------------------------------------------------------------------------- */
+
+.neiki-gallery--grid {
+  display: grid;
+  grid-template-columns: repeat(var(--neiki-columns, 4), 1fr);
+  gap: var(--neiki-gap, 10px);
+}
+
+.neiki-gallery--grid > a,
+.neiki-gallery--grid > .neiki-item {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--neiki-border-radius, 6px);
+  cursor: pointer;
+  text-decoration: none;
+  aspect-ratio: 1 / 1;
+}
+
+.neiki-gallery--grid > a > img,
+.neiki-gallery--grid > .neiki-item > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--neiki-border-radius, 6px);
+  transition: transform var(--neiki-transition-duration) var(--neiki-transition-easing),
+              opacity var(--neiki-transition-duration) var(--neiki-transition-easing);
+  opacity: 0;
+}
+
+.neiki-gallery--grid > a > img.neiki-loaded,
+.neiki-gallery--grid > .neiki-item > img.neiki-loaded {
+  opacity: 1;
+}
+
+.neiki-gallery--grid > a:hover > img,
+.neiki-gallery--grid > .neiki-item:hover > img {
+  transform: scale(1.05);
+}
+
+/* --------------------------------------------------------------------------
+   5. Responsive Columns
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 1200px) {
+  .neiki-gallery--masonry { column-count: 3; }
+  .neiki-gallery--grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .neiki-gallery--masonry { column-count: 2; }
+  .neiki-gallery--grid { grid-template-columns: repeat(2, 1fr); }
+  .neiki-gallery { --neiki-gap: 10px; }
+}
+
+@media (max-width: 600px) {
+  .neiki-gallery--masonry { column-count: 2; }
+  .neiki-gallery--grid { grid-template-columns: repeat(2, 1fr); }
+  .neiki-gallery { --neiki-gap: 8px; }
+}
+
+@media (max-width: 400px) {
+  .neiki-gallery--masonry { column-count: 1; }
+  .neiki-gallery--grid { grid-template-columns: 1fr; }
+  .neiki-gallery { --neiki-gap: 8px; }
+}
+
+/* --------------------------------------------------------------------------
+   6. Lightbox Overlay
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--neiki-overlay-bg);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--neiki-transition-duration) var(--neiki-transition-easing),
+              visibility 0s linear var(--neiki-transition-duration);
+  -webkit-user-select: none;
+  user-select: none;
+  outline: none;
+}
+
+.neiki-lightbox.neiki-lightbox--visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--neiki-transition-duration) var(--neiki-transition-easing),
+              visibility 0s linear 0s;
+}
+
+/* --------------------------------------------------------------------------
+   7. Lightbox Image Container
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox__stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.neiki-lightbox__slide-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Fade transition */
+.neiki-lightbox--fade .neiki-lightbox__image {
+  transition: opacity var(--neiki-transition-duration) var(--neiki-transition-easing);
+}
+
+.neiki-lightbox--fade .neiki-lightbox__image.neiki-entering {
+  opacity: 0;
+}
+
+.neiki-lightbox--fade .neiki-lightbox__image.neiki-active {
+  opacity: 1;
+}
+
+/* Slide transition */
+.neiki-lightbox--slide .neiki-lightbox__slide-wrapper {
+  transition: transform var(--neiki-transition-duration) var(--neiki-transition-easing);
+}
+
+.neiki-lightbox__image {
+  max-width: var(--neiki-lightbox-max-width, 90vw);
+  max-height: var(--neiki-lightbox-max-height, 85vh);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--neiki-border-radius, 6px);
+  cursor: zoom-in;
+  transition: transform 0.35s var(--neiki-transition-easing),
+              opacity var(--neiki-transition-duration) var(--neiki-transition-easing);
+  -webkit-user-drag: none;
+  pointer-events: auto;
+}
+
+.neiki-lightbox__image.neiki-zoomed {
+  transform: scale(var(--neiki-zoom-scale, 2));
+  cursor: zoom-out;
+}
+
+/* --------------------------------------------------------------------------
+   8. Lightbox Controls (Nav, Close, Fullscreen)
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox__btn {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--neiki-btn-size);
+  height: var(--neiki-btn-size);
+  border: none;
+  border-radius: var(--neiki-btn-border-radius);
+  background: var(--neiki-btn-bg);
+  color: var(--neiki-btn-color);
+  cursor: pointer;
+  transition: background var(--neiki-transition-duration) var(--neiki-transition-easing),
+              transform 0.15s ease;
+  padding: 0;
+  line-height: 1;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+.neiki-lightbox__btn:hover {
+  background: var(--neiki-btn-bg-hover);
+}
+
+.neiki-lightbox__btn:active {
+  transform: scale(0.92);
+}
+
+.neiki-lightbox__btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.6);
+}
+
+/* Close */
+.neiki-lightbox__close {
+  top: 16px;
+  right: 16px;
+}
+
+/* Fullscreen */
+.neiki-lightbox__fullscreen {
+  top: 16px;
+  right: 76px;
+}
+
+/* Prev / Next */
+.neiki-lightbox__prev {
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.neiki-lightbox__prev:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+.neiki-lightbox__next {
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.neiki-lightbox__next:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+/* SVG icons inside buttons */
+.neiki-lightbox__btn svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --------------------------------------------------------------------------
+   9. Lightbox Top Bar (Counter)
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox__topbar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.neiki-lightbox__counter {
+  color: var(--neiki-counter-color);
+  font-size: var(--neiki-counter-font-size);
+  font-family: system-ui, -apple-system, sans-serif;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   10. Lightbox Caption
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox__caption {
+  flex: 0 0 auto;
+  width: 100%;
+  text-align: center;
+  padding: 10px 60px;
+  color: var(--neiki-caption-color);
+  font-size: var(--neiki-caption-font-size);
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  min-height: 1.5em;
+  transition: opacity var(--neiki-transition-duration) var(--neiki-transition-easing);
+}
+
+/* --------------------------------------------------------------------------
+   11. Thumbnail Strip
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox__thumbs {
+  flex: 0 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--neiki-thumb-gap);
+  padding: 8px 16px 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.neiki-lightbox__thumbs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.neiki-lightbox__thumbs::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.neiki-lightbox__thumb {
+  flex: 0 0 auto;
+  width: var(--neiki-thumb-size);
+  height: var(--neiki-thumb-size);
+  border-radius: var(--neiki-thumb-border-radius);
+  overflow: hidden;
+  cursor: pointer;
+  opacity: var(--neiki-thumb-opacity);
+  border: 2px solid transparent;
+  transition: opacity var(--neiki-transition-duration) var(--neiki-transition-easing),
+              border-color var(--neiki-transition-duration) var(--neiki-transition-easing);
+  background: rgba(128, 128, 128, 0.15);
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+.neiki-lightbox__thumb:hover {
+  opacity: 0.8;
+}
+
+.neiki-lightbox__thumb.neiki-thumb--active {
+  opacity: var(--neiki-thumb-active-opacity);
+  border: var(--neiki-thumb-active-border);
+}
+
+.neiki-lightbox__thumb:focus-visible {
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.6);
+}
+
+.neiki-lightbox__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --------------------------------------------------------------------------
+   12. Loading Spinner
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox__spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: var(--neiki-spinner-size);
+  height: var(--neiki-spinner-size);
+  border: var(--neiki-spinner-width) solid rgba(128, 128, 128, 0.25);
+  border-top-color: var(--neiki-spinner-color);
+  border-radius: 50%;
+  animation: neiki-spin 0.7s linear infinite;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes neiki-spin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Hide spinner when image loaded */
+.neiki-lightbox__spinner.neiki-hidden {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   13. Lazy-load placeholder (shimmer)
+   -------------------------------------------------------------------------- */
+
+.neiki-gallery > a,
+.neiki-gallery > .neiki-item {
+  background: linear-gradient(110deg, #e0e0e0 8%, #f0f0f0 18%, #e0e0e0 33%);
+  background-size: 200% 100%;
+  animation: neiki-shimmer 1.4s linear infinite;
+}
+
+[data-theme="dark"] .neiki-gallery > a,
+[data-theme="dark"] .neiki-gallery > .neiki-item,
+.neiki-gallery[data-theme="dark"] > a,
+.neiki-gallery[data-theme="dark"] > .neiki-item {
+  background: linear-gradient(110deg, #2a2a2a 8%, #333 18%, #2a2a2a 33%);
+  background-size: 200% 100%;
+}
+
+@keyframes neiki-shimmer {
+  to { background-position: -200% 0; }
+}
+
+/* --------------------------------------------------------------------------
+   14. Accessibility — Focus & Reduced Motion
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .neiki-lightbox,
+  .neiki-lightbox__image,
+  .neiki-lightbox__slide-wrapper,
+  .neiki-gallery--masonry > a > img,
+  .neiki-gallery--grid > a > img {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   15. Mobile adjustments
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  .neiki-lightbox {
+    --neiki-lightbox-max-width: 94vw;
+    --neiki-lightbox-max-height: 75vh;
+    --neiki-btn-size: 42px;
+    --neiki-zoom-scale: 1.8;
+  }
+
+  .neiki-lightbox__prev,
+  .neiki-lightbox__next {
+    width: 42px;
+    height: 42px;
+  }
+
+  .neiki-lightbox__btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .neiki-lightbox__caption {
+    padding: 8px 20px;
+    font-size: 14px;
+  }
+
+  .neiki-lightbox__thumbs {
+    padding: 6px 10px 10px;
+  }
+
+  .neiki-lightbox__thumb {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 600px) {
+  .neiki-lightbox {
+    --neiki-lightbox-max-width: 96vw;
+    --neiki-lightbox-max-height: 70vh;
+    --neiki-btn-size: 38px;
+    --neiki-zoom-scale: 1.6;
+  }
+
+  .neiki-lightbox__prev,
+  .neiki-lightbox__next {
+    width: 38px;
+    height: 38px;
+  }
+
+  .neiki-lightbox__prev {
+    left: 6px;
+  }
+
+  .neiki-lightbox__next {
+    right: 6px;
+  }
+
+  .neiki-lightbox__close {
+    top: 10px;
+    right: 10px;
+  }
+
+  .neiki-lightbox__fullscreen {
+    top: 10px;
+    right: 56px;
+  }
+
+  .neiki-lightbox__topbar {
+    top: 10px;
+    left: 10px;
+  }
+
+  .neiki-lightbox__caption {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  .neiki-lightbox__thumbs {
+    padding: 4px 6px 8px;
+  }
+
+  .neiki-lightbox__thumb {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 400px) {
+  .neiki-lightbox {
+    --neiki-lightbox-max-width: 98vw;
+    --neiki-lightbox-max-height: 65vh;
+    --neiki-btn-size: 34px;
+  }
+
+  .neiki-lightbox__prev,
+  .neiki-lightbox__next {
+    width: 34px;
+    height: 34px;
+  }
+
+  .neiki-lightbox__btn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .neiki-lightbox__caption {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+
+  .neiki-lightbox__thumb {
+    width: 34px;
+    height: 34px;
+  }
+
+  .neiki-lightbox__counter {
+    font-size: 11px;
+  }
+}

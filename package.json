@@ -1,0 +1,39 @@
+{
+  "name": "neiki-gallery",
+  "version": "1.0.0",
+  "description": "Vanilla JavaScript image gallery and lightbox — zero dependencies",
+  "keywords": [
+    "gallery",
+    "lightbox",
+    "image-gallery",
+    "masonry",
+    "grid",
+    "vanilla-js",
+    "responsive",
+    "zoom",
+    "fullscreen"
+  ],
+  "main": "dist/neiki-gallery.js",
+  "exports": {
+    ".": "./dist/neiki-gallery.js",
+    "./min": "./dist/neiki-gallery.min.js",
+    "./style": "./dist/neiki-gallery.css",
+    "./style/min": "./dist/neiki-gallery.min.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "style": "dist/neiki-gallery.css",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neikiri/neiki-gallery.git"
+  },
+  "bugs": {
+    "url": "https://github.com/neikiri/neiki-gallery/issues"
+  },
+  "unpkg": "dist/neiki-gallery.min.js",
+  "jsdelivr": "dist/neiki-gallery.min.js",
+  "homepage": "https://github.com/neikiri/neiki-gallery#readme",
+  "author": "Jindřich Stoklasa <jindrichstoklasa1@gmail.com>",
+  "license": "MIT"
+}

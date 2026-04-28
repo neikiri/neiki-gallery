@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neiki Gallery — Demo</title>
+  <link rel="stylesheet" href="neiki-gallery.css">
+  <style>
+    /* ---------- Demo page styles ---------- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      line-height: 1.6;
+      padding: 0 0 80px;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+    }
+
+    .hero-logo {
+      display: block;
+      width: 100%;
+      max-width: 700px;
+      height: auto;
+      margin: 0 auto;
+    }
+
+    .hero p {
+      margin-top: 12px;
+      color: #999;
+      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 10px;
+    }
+
+    /* Sections */
+    .section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .section h2 {
+      font-size: clamp(1.15rem, 3vw, 1.5rem);
+      font-weight: 700;
+      margin: 48px 0 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .section p.desc {
+      color: #888;
+      margin-bottom: 20px;
+      font-size: clamp(0.82rem, 2vw, 0.95rem);
+    }
+
+    /* Feature tags */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(102, 126, 234, 0.15);
+      color: #93a4f4;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    /* API Demo Buttons */
+    .api-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .api-controls button {
+      padding: 8px 20px;
+      border: 1px solid #444;
+      background: #1a1a1a;
+      color: #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .api-controls button:hover {
+      background: #2a2a2a;
+      border-color: #667eea;
+      color: #fff;
+    }
+
+    /* Events log */
+    .events-log {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      max-height: 160px;
+      overflow-y: auto;
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: #93a4f4;
+    }
+
+    .events-log:empty::before {
+      content: 'Events will appear here…';
+      color: #555;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 60px 20px 0;
+      color: #555;
+      font-size: 0.85rem;
+    }
+
+    .footer a {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    /* Override columns for specific galleries */
+    #gallery-grid {
+      --neiki-columns: 4;
+    }
+
+    /* ========== Responsive — Demo Page ========== */
+
+    @media (max-width: 1024px) {
+      .hero {
+        padding: 48px 16px 32px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding-bottom: 48px;
+      }
+
+      .hero {
+        padding: 36px 14px 24px;
+      }
+
+      .section {
+        padding: 0 14px;
+      }
+
+      .section h2 {
+        margin: 36px 0 16px;
+      }
+
+      .tags {
+        gap: 6px;
+      }
+
+      .tag {
+        padding: 3px 10px;
+        font-size: 0.76rem;
+      }
+
+      .api-controls {
+        gap: 8px;
+      }
+
+      .api-controls button {
+        padding: 7px 14px;
+        font-size: 0.82rem;
+      }
+
+      .events-log {
+        padding: 12px;
+        font-size: 0.76rem;
+        max-height: 130px;
+      }
+
+      .footer {
+        padding: 40px 14px 0;
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding-bottom: 32px;
+      }
+
+      .hero {
+        padding: 28px 10px 18px;
+      }
+
+      .hero p {
+        margin-top: 8px;
+      }
+
+      .section {
+        padding: 0 10px;
+      }
+
+      .section h2 {
+        margin: 28px 0 12px;
+        padding-bottom: 8px;
+      }
+
+      .api-controls {
+        flex-direction: column;
+      }
+
+      .api-controls button {
+        width: 100%;
+        text-align: center;
+      }
+
+      .footer {
+        padding: 28px 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================
+       Hero
+       ================================================================ -->
+  <header class="hero">
+    <img src="logo.png" class="hero-logo" alt="Neiki Gallery">
+    <p>A zero-dependency vanilla JavaScript image gallery &amp; lightbox. Drop two files, get a beautiful gallery.</p>
+    <div class="tags" style="justify-content: center; margin-top: 20px;">
+      <span class="tag">Masonry &amp; Grid</span>
+      <span class="tag">Lightbox</span>
+      <span class="tag">Touch / Swipe</span>
+      <span class="tag">Lazy Loading</span>
+      <span class="tag">Zoom</span>
+      <span class="tag">Fullscreen</span>
+      <span class="tag">Keyboard Nav</span>
+      <span class="tag">Captions</span>
+      <span class="tag">Thumbnails</span>
+      <span class="tag">Deep Linking</span>
+      <span class="tag">Theming</span>
+      <span class="tag">0 Dependencies</span>
+    </div>
+  </header>
+
+  <!-- ================================================================
+       1. Masonry Gallery (Auto-init, Dark Theme)
+       ================================================================ -->
+  <div class="section">
+    <h2>1. Masonry Layout — Dark Theme (Auto-init)</h2>
+    <p class="desc">Uses <code>data-neiki-gallery</code> for zero-JS initialization. Masonry layout with dark theme, fade transition.</p>
+
+    <div data-neiki-gallery data-layout="masonry" data-theme="dark" data-transition="fade" id="gallery-masonry">
+      <a href="https://picsum.photos/id/10/1200/800" data-caption="Lush forest trail">
+        <img src="https://picsum.photos/id/10/400/267" alt="Forest trail">
+      </a>
+      <a href="https://picsum.photos/id/11/1200/800" data-caption="Autumn lake reflections">
+        <img src="https://picsum.photos/id/11/400/267" alt="Autumn lake">
+      </a>
+      <a href="https://picsum.photos/id/14/1200/800" data-caption="Mountain bridge at sunset">
+        <img src="https://picsum.photos/id/14/400/267" alt="Mountain bridge">
+      </a>
+      <a href="https://picsum.photos/id/15/1200/800" data-caption="Path through the pines">
+        <img src="https://picsum.photos/id/15/400/267" alt="Pine path">
+      </a>
+      <a href="https://picsum.photos/id/16/1200/800" data-caption="Waves on the shore">
+        <img src="https://picsum.photos/id/16/400/267" alt="Shore waves">
+      </a>
+      <a href="https://picsum.photos/id/17/1200/800" data-caption="Rocky coastline">
+        <img src="https://picsum.photos/id/17/400/267" alt="Coastline">
+      </a>
+      <a href="https://picsum.photos/id/18/1200/800" data-caption="Serene countryside">
+        <img src="https://picsum.photos/id/18/400/267" alt="Countryside">
+      </a>
+      <a href="https://picsum.photos/id/19/1200/900" data-caption="Desert landscape">
+        <img src="https://picsum.photos/id/19/400/300" alt="Desert">
+      </a>
+      <a href="https://picsum.photos/id/20/1200/800" data-caption="Bird's eye city view">
+        <img src="https://picsum.photos/id/20/400/267" alt="City view">
+      </a>
+      <a href="https://picsum.photos/id/21/1200/800" data-caption="Waterfall in the jungle">
+        <img src="https://picsum.photos/id/21/400/267" alt="Waterfall">
+      </a>
+      <a href="https://picsum.photos/id/22/1200/800" data-caption="Snowy mountain peak">
+        <img src="https://picsum.photos/id/22/400/267" alt="Snowy peak">
+      </a>
+      <a href="https://picsum.photos/id/23/1200/800" data-caption="Golden hour meadow">
+        <img src="https://picsum.photos/id/23/400/267" alt="Meadow">
+      </a>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       2. Uniform Grid Gallery (Auto-init, Light Theme, Slide)
+       ================================================================ -->
+  <div class="section">
+    <h2>2. Uniform Grid — Light Theme (Slide Transition)</h2>
+    <p class="desc">Grid layout with uniform aspect ratios. Light theme with slide transition and infinite loop.</p>
+
+    <div data-neiki-gallery data-layout="grid" data-theme="light" data-transition="slide" data-loop="true" id="gallery-grid">
+      <a href="https://picsum.photos/id/24/1200/800" data-caption="Calm ocean">
+        <img src="https://picsum.photos/id/24/400/400" alt="Ocean">
+      </a>
+      <a href="https://picsum.photos/id/25/1200/800" data-caption="Architectural wonder">
+        <img src="https://picsum.photos/id/25/400/400" alt="Architecture">
+      </a>
+      <a href="https://picsum.photos/id/26/1200/800" data-caption="Night city lights">
+        <img src="https://picsum.photos/id/26/400/400" alt="City lights">
+      </a>
+      <a href="https://picsum.photos/id/27/1200/800" data-caption="Misty morning">
+        <img src="https://picsum.photos/id/27/400/400" alt="Misty morning">
+      </a>
+      <a href="https://picsum.photos/id/28/1200/800" data-caption="Vintage camera">
+        <img src="https://picsum.photos/id/28/400/400" alt="Camera">
+      </a>
+      <a href="https://picsum.photos/id/29/1200/800" data-caption="Rustic barn">
+        <img src="https://picsum.photos/id/29/400/400" alt="Barn">
+      </a>
+      <a href="https://picsum.photos/id/30/1200/800" data-caption="Spring blossoms">
+        <img src="https://picsum.photos/id/30/400/400" alt="Blossoms">
+      </a>
+      <a href="https://picsum.photos/id/31/1200/800" data-caption="Golden bridge">
+        <img src="https://picsum.photos/id/31/400/400" alt="Bridge">
+      </a>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       3. Manual Init + JS API Demo
+       ================================================================ -->
+  <div class="section">
+    <h2>3. Manual JS Init + API Demo</h2>
+    <p class="desc">Initialized via <code>new NeikiGallery()</code> with custom options. Use the buttons below to control the gallery programmatically.</p>
+
+    <div class="api-controls">
+      <button onclick="apiGallery.open(0)">Open at #1</button>
+      <button onclick="apiGallery.open(3)">Open at #4</button>
+      <button onclick="apiGallery.next()">Next</button>
+      <button onclick="apiGallery.prev()">Prev</button>
+      <button onclick="apiGallery.close()">Close</button>
+    </div>
+
+    <div id="gallery-api">
+      <a href="https://picsum.photos/id/32/1200/800" data-caption="Cozy cabin retreat">
+        <img src="https://picsum.photos/id/32/400/267" alt="Cabin">
+      </a>
+      <a href="https://picsum.photos/id/33/1200/800" data-caption="Starry night sky">
+        <img src="https://picsum.photos/id/33/400/267" alt="Stars">
+      </a>
+      <a href="https://picsum.photos/id/34/1200/800" data-caption="Lighthouse on the cliff">
+        <img src="https://picsum.photos/id/34/400/267" alt="Lighthouse">
+      </a>
+      <a href="https://picsum.photos/id/35/1200/800" data-caption="Rainy street">
+        <img src="https://picsum.photos/id/35/400/267" alt="Rainy street">
+      </a>
+      <a href="https://picsum.photos/id/36/1200/800" data-caption="Tropical beach">
+        <img src="https://picsum.photos/id/36/400/267" alt="Beach">
+      </a>
+      <a href="https://picsum.photos/id/37/1200/800" data-caption="Cherry blossoms in spring">
+        <img src="https://picsum.photos/id/37/400/267" alt="Cherry blossoms">
+      </a>
+    </div>
+
+    <div class="events-log" id="events-log"></div>
+  </div>
+
+  <!-- ================================================================
+       Footer
+       ================================================================ -->
+  <footer class="footer">
+    <p>Neiki Gallery v1.0.0 &middot; Vanilla JS &middot; Zero Dependencies</p>
+  </footer>
+
+  <!-- ================================================================
+       Scripts
+       ================================================================ -->
+  <script src="neiki-gallery.js"></script>
+  <script>
+    // Manual init for the API demo gallery
+    var apiGallery = new NeikiGallery('#gallery-api', {
+      layout: 'masonry',
+      loop: true,
+      thumbnails: true,
+      zoom: true,
+      fullscreen: true,
+      transition: 'fade',
+      theme: 'dark',
+      hashNavigation: true
+    });
+
+    // Log events
+    var logEl = document.getElementById('events-log');
+
+    function log(msg) {
+      var line = document.createElement('div');
+      var time = new Date().toLocaleTimeString();
+      line.textContent = '[' + time + '] ' + msg;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    apiGallery.on('open', function (index) {
+      log('open → image ' + (index + 1));
+    });
+
+    apiGallery.on('close', function () {
+      log('close');
+    });
+
+    apiGallery.on('change', function (index) {
+      log('change → image ' + (index + 1));
+    });
+  </script>
+</body>
+</html>
