@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/css-%23663399.svg?style=for-the-badge&logo=css&logoColor=white" alt="CSS">
   <br>
   <img src="https://img.shields.io/badge/License-MIT-2563EB?style=for-the-badge&logo=open-source-initiative&logoColor=white&labelColor=000F15&logoWidth=20" alt="License">
-  <img src="https://img.shields.io/badge/Version-1.0.0-2563EB?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=000F15&logoWidth=20" alt="Version">
+  <img src="https://img.shields.io/badge/Version-2.0.0-2563EB?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=000F15&logoWidth=20" alt="Version">
 </p>
 
 <p align="center">
@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Layouts-Masonry%20%26%20Grid-3b82f6?style=flat&labelColor=383C43" />
+  <img src="https://img.shields.io/badge/Layouts-Masonry%20·%20Grid%20·%20Mosaic%20·%20Filmstrip-3b82f6?style=flat&labelColor=383C43" />
   <img src="https://img.shields.io/badge/Themes-Light%20%26%20Dark-8b5cf6?style=flat&labelColor=383C43" />
   <img src="https://img.shields.io/badge/Setup-Zero%20Config-22c55e?style=flat&labelColor=383C43" />
   <img src="https://img.shields.io/badge/Size-Lightweight-f97316?style=flat&labelColor=383C43" />
@@ -33,26 +33,30 @@
 
 ## ✨ Features
 
-- **Masonry & Grid layouts** — switchable via option or `data-` attribute
-- **Lightbox** — smooth open/close animations with fade or slide transitions
-- **Keyboard navigation** — arrow keys, Escape, Home/End, F for fullscreen
-- **Touch / swipe support** — mobile-friendly left/right swipe to navigate
-- **Lazy loading** — IntersectionObserver-powered with shimmer placeholders
-- **Image captions** — via `data-caption` attribute
-- **Thumbnail strip** — optional scrollable thumbnails in lightbox
-- **Zoom** — click to toggle zoom in/out
-- **Fullscreen mode** — native Fullscreen API
-- **Image counter** — e.g. "3 / 12"
-- **Loading spinner** — pure CSS spinner while images load
-- **Deep linking** — URL hash support (`#neiki-1=3` opens image 3)
+- **4 Layouts** — Masonry, Grid, Mosaic (`data-size`), and Filmstrip (horizontal scroll)
+- **Glassmorphism lightbox** — backdrop-blur overlay with floating toolbar
+- **Slideshow / Autoplay** — animated progress bar, play/pause, configurable interval
+- **Comparison slider** — `NeikiGallery.compare()` for before/after image comparison
+- **Share popup** — copy link to clipboard or download image from lightbox
+- **Contextual zoom** — zoom to clicked point with pan support
+- **Batch select** — Shift+click multi-select with checkmark overlays
+- **Tag filtering** — auto-generated pill filter bar from `data-tags`
+- **Staggered entrance** — sequential fade-in animation on load
+- **Keyboard navigation** — arrows, Escape, Home/End, F (fullscreen), Space (slideshow)
+- **Touch / swipe** — mobile-friendly left/right swipe navigation
+- **Lazy loading** — IntersectionObserver with shimmer placeholders
+- **Image captions** — bottom-sheet style on mobile
+- **Thumbnail strip** — scrollable thumbnails with scale hover effect
+- **Zoom** — click to toggle zoom, or contextual zoom to cursor point
+- **Fullscreen** — native Fullscreen API
+- **Pill counter** — glassmorphism pill-shaped counter badge
+- **Toast notifications** — for share/copy actions
+- **Deep linking** — URL hash navigation
 - **Multiple instances** — independent galleries on one page
-- **Dark & light themes** — via CSS custom properties and `data-theme`
+- **Dark & light themes** — CSS custom properties + accent color system (`--neiki-accent`)
 - **Accessibility** — ARIA attributes, focus management, `prefers-reduced-motion`
-- **Preloading** — adjacent images preloaded for instant navigation
-- **Infinite loop** — optional wrap-around navigation
-- **Event system** — `open`, `close`, `change` events
-- **Clean destroy** — full cleanup of DOM nodes and event listeners
-- **Cross-browser** — Chrome, Firefox, Safari, Edge
+- **Event system** — `open`, `close`, `change`, `filter`, `select`, `slideshowStart`, `slideshowStop`
+- **Cross-browser** — Chrome 60+, Firefox 55+, Safari 12+, Edge 79+
 
 ## 🚀 Quick Start
 
@@ -88,8 +92,8 @@ That's it — galleries with `data-neiki-gallery` auto-initialize on page load.
 
 > **Pin a specific version** to avoid unexpected changes:
 > ```
-> http://cdn.neiki.eu/neiki-gallery/1.0.0/neiki-gallery.min.js
-> http://cdn.neiki.eu/neiki-gallery/1.0.0/neiki-gallery.min.css
+> http://cdn.neiki.eu/neiki-gallery/2.0.0/neiki-gallery.min.js
+> http://cdn.neiki.eu/neiki-gallery/2.0.0/neiki-gallery.min.css
 > ```
 
 ### Self-Hosting (Local)
@@ -120,14 +124,21 @@ The `dist/` folder contains both minified and unminified versions:
 
 ```js
 const gallery = new NeikiGallery('#my-gallery', {
-  layout: 'masonry',   // 'masonry' | 'grid'
+  layout: 'masonry',       // 'masonry' | 'grid' | 'mosaic' | 'filmstrip'
   loop: true,
   thumbnails: true,
   zoom: true,
+  contextualZoom: false,   // zoom to click point
   fullscreen: true,
-  transition: 'fade',  // 'fade' | 'slide'
-  theme: 'dark',       // 'dark' | 'light'
+  transition: 'fade',      // 'fade' | 'slide'
+  theme: 'dark',           // 'dark' | 'light'
   hashNavigation: true,
+  stagger: true,           // entrance animation
+  slideshow: false,        // auto-start slideshow on open
+  slideshowInterval: 4000, // ms between slides
+  share: true,             // share/download popup
+  filter: false,           // tag filtering
+  batchSelect: false,      // Shift+click multi-select
 });
 ```
 
@@ -136,11 +147,33 @@ const gallery = new NeikiGallery('#my-gallery', {
 ### Methods
 
 ```js
-gallery.open(index);   // Open lightbox at image index
-gallery.close();       // Close lightbox
-gallery.next();        // Go to next image
-gallery.prev();        // Go to previous image
-gallery.destroy();     // Remove gallery, clean up all listeners & DOM
+gallery.open(index);          // Open lightbox at image index
+gallery.close();              // Close lightbox
+gallery.next();               // Go to next image
+gallery.prev();               // Go to previous image
+gallery.startSlideshow();     // Start autoplay
+gallery.stopSlideshow();      // Stop autoplay
+gallery.toggleSlideshow();    // Toggle autoplay
+gallery.filter('landscape');  // Filter by tag (null = show all)
+gallery.getSelected();        // Get batch-selected items
+gallery.clearSelection();     // Clear batch selection
+gallery.destroy();            // Remove gallery, clean up all listeners & DOM
+```
+
+### Static Utilities
+
+```js
+// Comparison slider
+const slider = NeikiGallery.compare('#compare-container', {
+  before: 'before.jpg',
+  after: 'after.jpg',
+  labelBefore: 'Before',
+  labelAfter: 'After',
+  startPosition: 50
+});
+
+slider.setPosition(30);  // Move handle to 30%
+slider.destroy();        // Clean up
 ```
 
 ### Events
@@ -157,24 +190,43 @@ gallery.on('close', () => {
 gallery.on('change', (index) => {
   console.log('Now showing image', index);
 });
+
+gallery.on('filter', (tag) => {
+  console.log('Filtered by:', tag);
+});
+
+gallery.on('select', (indices) => {
+  console.log('Selected:', indices);
+});
+
+gallery.on('slideshowStart', () => {
+  console.log('Slideshow started');
+});
 ```
 
 ### Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `layout` | `string` | `'masonry'` | Grid layout: `'masonry'` or `'grid'` |
+| `layout` | `string` | `'masonry'` | `'masonry'` · `'grid'` · `'mosaic'` · `'filmstrip'` |
 | `loop` | `boolean` | `false` | Enable infinite loop navigation |
 | `thumbnails` | `boolean` | `true` | Show thumbnail strip in lightbox |
 | `zoom` | `boolean` | `true` | Enable zoom on image click |
+| `contextualZoom` | `boolean` | `false` | Zoom to cursor point instead of center |
 | `fullscreen` | `boolean` | `true` | Show fullscreen button |
-| `transition` | `string` | `'fade'` | Transition effect: `'fade'` or `'slide'` |
-| `theme` | `string` | `'dark'` | Theme: `'dark'` or `'light'` |
-| `hashNavigation` | `boolean` | `true` | Enable URL hash deep linking |
+| `transition` | `string` | `'fade'` | `'fade'` or `'slide'` |
+| `theme` | `string` | `'dark'` | `'dark'` or `'light'` |
+| `hashNavigation` | `boolean` | `true` | URL hash deep linking |
 | `counter` | `boolean` | `true` | Show image counter |
 | `captions` | `boolean` | `true` | Show image captions |
-| `preload` | `number` | `1` | Number of adjacent images to preload |
+| `preload` | `number` | `1` | Adjacent images to preload |
 | `lazyLoad` | `boolean` | `true` | Lazy load grid thumbnails |
+| `stagger` | `boolean` | `true` | Staggered entrance animation |
+| `slideshow` | `boolean` | `false` | Auto-start slideshow on open |
+| `slideshowInterval` | `number` | `4000` | Slideshow interval in ms |
+| `share` | `boolean` | `true` | Show share button in lightbox |
+| `filter` | `boolean` | `false` | Enable tag filtering bar |
+| `batchSelect` | `boolean` | `false` | Enable Shift+click multi-select |
 
 ### Data Attributes
 
@@ -182,14 +234,21 @@ All options can also be set via `data-` attributes on the container:
 
 ```html
 <div data-neiki-gallery
-     data-layout="grid"
+     data-layout="mosaic"
      data-theme="light"
      data-transition="slide"
      data-loop="true"
-     data-thumbnails="true"
-     data-zoom="true"
-     data-fullscreen="true"
-     data-hash-navigation="true">
+     data-stagger="true"
+     data-slideshow="false"
+     data-slideshow-interval="5000"
+     data-share="true"
+     data-filter="true"
+     data-batch-select="false"
+     data-contextual-zoom="true">
+  <a href="full.jpg" data-tags="landscape,nature" data-size="large">
+    <img src="thumb.jpg" alt="Photo">
+  </a>
+</div>
 ```
 
 ## 🎨 Theming
@@ -199,15 +258,20 @@ Neiki Gallery uses CSS custom properties for full theming control:
 ```css
 :root {
   --neiki-columns: 4;
-  --neiki-gap: 12px;
-  --neiki-border-radius: 6px;
-  --neiki-overlay-bg: rgba(0, 0, 0, 0.92);
-  --neiki-btn-bg: rgba(255, 255, 255, 0.12);
+  --neiki-gap: 14px;
+  --neiki-border-radius: 14px;
+  --neiki-accent: #3b82f6;
+  --neiki-overlay-bg: rgba(8, 8, 12, 0.85);
+  --neiki-overlay-backdrop: blur(24px) saturate(1.2);
+  --neiki-btn-bg: rgba(255, 255, 255, 0.1);
   --neiki-btn-color: #fff;
   --neiki-caption-color: #fff;
-  --neiki-spinner-color: #fff;
-  --neiki-thumb-size: 56px;
+  --neiki-spinner-color: var(--neiki-accent);
+  --neiki-thumb-size: 52px;
   --neiki-zoom-scale: 2;
+  --neiki-stagger-delay: 0.04s;
+  --neiki-hover-lift: -4px;
+  --neiki-hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
   --neiki-transition-duration: 0.3s;
   /* ... and more */
 }
@@ -231,3 +295,9 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 ## 📬 Contact
 
 - **Email:** [dev@neiki.eu](mailto:dev@neiki.eu)
+
+---
+
+<p align="center">
+  Made with ❤️ for the web community
+</p>

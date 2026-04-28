@@ -1,5 +1,5 @@
 /*!
- * Neiki Gallery v1.0.0
+ * Neiki Gallery v2.0.0
  * A vanilla JavaScript image gallery / lightbox library.
  * No dependencies. No frameworks.
  *
@@ -26,36 +26,23 @@
 
   var uid = 0;
 
-  /**
-   * Generate a unique ID for each gallery instance.
-   */
   function nextId() {
     return ++uid;
   }
 
-  /**
-   * Merge defaults with user options (shallow).
-   */
   function mergeOptions(defaults, opts) {
     var result = {};
     for (var key in defaults) {
-      if (defaults.hasOwnProperty(key)) {
-        result[key] = defaults[key];
-      }
+      if (defaults.hasOwnProperty(key)) result[key] = defaults[key];
     }
     if (opts) {
       for (var key in opts) {
-        if (opts.hasOwnProperty(key)) {
-          result[key] = opts[key];
-        }
+        if (opts.hasOwnProperty(key)) result[key] = opts[key];
       }
     }
     return result;
   }
 
-  /**
-   * Query helper.
-   */
   function $(selector, ctx) {
     return (ctx || document).querySelector(selector);
   }
@@ -64,9 +51,6 @@
     return Array.prototype.slice.call((ctx || document).querySelectorAll(selector));
   }
 
-  /**
-   * Create an element with optional class, attributes, and innerHTML.
-   */
   function createElement(tag, className, attrs, html) {
     var el = document.createElement(tag);
     if (className) el.className = className;
@@ -79,6 +63,20 @@
     return el;
   }
 
+  function showToast(message) {
+    var existing = document.querySelector('.neiki-toast');
+    if (existing) existing.remove();
+    var toast = createElement('div', 'neiki-toast', {}, message);
+    document.body.appendChild(toast);
+    requestAnimationFrame(function () {
+      toast.classList.add('neiki-toast--visible');
+    });
+    setTimeout(function () {
+      toast.classList.remove('neiki-toast--visible');
+      setTimeout(function () { if (toast.parentNode) toast.remove(); }, 300);
+    }, 2000);
+  }
+
   /* ========================================================================
      SVG Icons
      ======================================================================== */
@@ -88,7 +86,13 @@
     prev: '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>',
     next: '<svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>',
     fullscreen: '<svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
-    exitFullscreen: '<svg viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>'
+    exitFullscreen: '<svg viewBox="0 0 24 24"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>',
+    share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+    play: '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>',
+    pause: '<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>',
+    zoom: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
+    link: '<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+    download: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
   };
 
   /* ========================================================================
@@ -96,18 +100,25 @@
      ======================================================================== */
 
   var DEFAULTS = {
-    layout: 'masonry',       // 'masonry' | 'grid'
-    loop: false,             // infinite loop navigation
-    thumbnails: true,        // show thumbnail strip in lightbox
-    zoom: true,              // allow zoom on click in lightbox
-    fullscreen: true,        // show fullscreen button
+    layout: 'masonry',       // 'masonry' | 'grid' | 'mosaic' | 'filmstrip'
+    loop: false,
+    thumbnails: true,
+    zoom: true,
+    contextualZoom: false,   // zoom to click point instead of center
+    fullscreen: true,
     transition: 'fade',      // 'fade' | 'slide'
     theme: 'dark',           // 'dark' | 'light'
-    hashNavigation: true,    // deep linking via URL hash
-    counter: true,           // show image counter
-    captions: true,          // show captions
-    preload: 1,              // how many adjacent images to preload
-    lazyLoad: true           // lazy load grid thumbnails
+    hashNavigation: true,
+    counter: true,
+    captions: true,
+    preload: 1,
+    lazyLoad: true,
+    stagger: true,           // staggered entrance animation
+    slideshow: false,        // auto-advance (can be started via API)
+    slideshowInterval: 4000, // ms between slides
+    share: true,             // show share button in lightbox
+    filter: false,           // enable tag filtering (reads data-tags)
+    batchSelect: false       // enable Shift+click multi-select
   };
 
   /* ========================================================================
@@ -115,7 +126,6 @@
      ======================================================================== */
 
   function NeikiGallery(selectorOrElement, options) {
-    // Allow omitting `new`
     if (!(this instanceof NeikiGallery)) {
       return new NeikiGallery(selectorOrElement, options);
     }
@@ -128,8 +138,11 @@
     this._isFullscreen = false;
     this._destroyed = false;
     this._boundHandlers = {};
+    this._slideshowTimer = null;
+    this._slideshowRunning = false;
+    this._shareVisible = false;
+    this._selectedIndices = [];
 
-    // Resolve the container element
     if (typeof selectorOrElement === 'string') {
       this._container = $(selectorOrElement);
     } else {
@@ -141,11 +154,8 @@
       return;
     }
 
-    // Read data-* attributes from the container and merge with JS options
     var dataOpts = this._readDataAttributes();
     this._options = mergeOptions(DEFAULTS, mergeOptions(dataOpts, options));
-
-    // Parse items from DOM
     this._items = this._parseItems();
 
     if (this._items.length === 0) {
@@ -153,35 +163,56 @@
       return;
     }
 
-    // Initialize
     this._setupGrid();
     this._setupLazyLoad();
+    this._setupStagger();
+    this._setupFilter();
     this._buildLightbox();
     this._bindEvents();
     this._checkHash();
   }
 
   /* ========================================================================
-     Prototype — Private Methods
+     Data Attributes
      ======================================================================== */
 
   NeikiGallery.prototype._readDataAttributes = function () {
     var c = this._container;
     var opts = {};
-    if (c.hasAttribute('data-layout')) opts.layout = c.getAttribute('data-layout');
-    if (c.hasAttribute('data-theme')) opts.theme = c.getAttribute('data-theme');
-    if (c.hasAttribute('data-loop')) opts.loop = c.getAttribute('data-loop') !== 'false';
-    if (c.hasAttribute('data-thumbnails')) opts.thumbnails = c.getAttribute('data-thumbnails') !== 'false';
-    if (c.hasAttribute('data-zoom')) opts.zoom = c.getAttribute('data-zoom') !== 'false';
-    if (c.hasAttribute('data-fullscreen')) opts.fullscreen = c.getAttribute('data-fullscreen') !== 'false';
-    if (c.hasAttribute('data-transition')) opts.transition = c.getAttribute('data-transition');
-    if (c.hasAttribute('data-hash-navigation')) opts.hashNavigation = c.getAttribute('data-hash-navigation') !== 'false';
+    var boolAttr = function (name) {
+      return c.hasAttribute(name) ? c.getAttribute(name) !== 'false' : undefined;
+    };
+    var strAttr = function (name) {
+      return c.hasAttribute(name) ? c.getAttribute(name) : undefined;
+    };
+    var numAttr = function (name) {
+      if (!c.hasAttribute(name)) return undefined;
+      var v = parseInt(c.getAttribute(name), 10);
+      return isNaN(v) ? undefined : v;
+    };
+
+    if (strAttr('data-layout') !== undefined) opts.layout = strAttr('data-layout');
+    if (strAttr('data-theme') !== undefined) opts.theme = strAttr('data-theme');
+    if (strAttr('data-transition') !== undefined) opts.transition = strAttr('data-transition');
+    if (boolAttr('data-loop') !== undefined) opts.loop = boolAttr('data-loop');
+    if (boolAttr('data-thumbnails') !== undefined) opts.thumbnails = boolAttr('data-thumbnails');
+    if (boolAttr('data-zoom') !== undefined) opts.zoom = boolAttr('data-zoom');
+    if (boolAttr('data-contextual-zoom') !== undefined) opts.contextualZoom = boolAttr('data-contextual-zoom');
+    if (boolAttr('data-fullscreen') !== undefined) opts.fullscreen = boolAttr('data-fullscreen');
+    if (boolAttr('data-hash-navigation') !== undefined) opts.hashNavigation = boolAttr('data-hash-navigation');
+    if (boolAttr('data-stagger') !== undefined) opts.stagger = boolAttr('data-stagger');
+    if (boolAttr('data-slideshow') !== undefined) opts.slideshow = boolAttr('data-slideshow');
+    if (numAttr('data-slideshow-interval') !== undefined) opts.slideshowInterval = numAttr('data-slideshow-interval');
+    if (boolAttr('data-share') !== undefined) opts.share = boolAttr('data-share');
+    if (boolAttr('data-filter') !== undefined) opts.filter = boolAttr('data-filter');
+    if (boolAttr('data-batch-select') !== undefined) opts.batchSelect = boolAttr('data-batch-select');
     return opts;
   };
 
-  /**
-   * Parse <a><img></a> children into an items array.
-   */
+  /* ========================================================================
+     Parse Items
+     ======================================================================== */
+
   NeikiGallery.prototype._parseItems = function () {
     var anchors = $$(':scope > a', this._container);
     var items = [];
@@ -192,40 +223,51 @@
         src: a.getAttribute('href') || (img ? img.getAttribute('src') : ''),
         thumb: img ? (img.getAttribute('data-src') || img.getAttribute('src')) : '',
         caption: a.getAttribute('data-caption') || (img ? img.getAttribute('alt') : '') || '',
+        tags: (a.getAttribute('data-tags') || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean),
+        size: a.getAttribute('data-size') || '',
         element: a,
         img: img
       });
-      // Prevent default link behaviour
       a.addEventListener('click', function (e) { e.preventDefault(); });
     }
     return items;
   };
 
-  /**
-   * Apply the grid layout class.
-   */
+  /* ========================================================================
+     Grid Setup
+     ======================================================================== */
+
   NeikiGallery.prototype._setupGrid = function () {
+    var layout = this._options.layout;
     this._container.classList.add('neiki-gallery');
-    if (this._options.layout === 'grid') {
-      this._container.classList.add('neiki-gallery--grid');
-      this._container.classList.remove('neiki-gallery--masonry');
-    } else {
-      this._container.classList.add('neiki-gallery--masonry');
-      this._container.classList.remove('neiki-gallery--grid');
+    this._container.classList.remove('neiki-gallery--masonry', 'neiki-gallery--grid', 'neiki-gallery--mosaic', 'neiki-gallery--filmstrip');
+
+    switch (layout) {
+      case 'grid':
+        this._container.classList.add('neiki-gallery--grid');
+        break;
+      case 'mosaic':
+        this._container.classList.add('neiki-gallery--mosaic');
+        break;
+      case 'filmstrip':
+        this._container.classList.add('neiki-gallery--filmstrip');
+        break;
+      default:
+        this._container.classList.add('neiki-gallery--masonry');
     }
-    // Theme
+
     if (this._options.theme) {
       this._container.setAttribute('data-theme', this._options.theme);
     }
   };
 
-  /**
-   * Lazy load grid thumbnails via IntersectionObserver.
-   */
+  /* ========================================================================
+     Lazy Load
+     ======================================================================== */
+
   NeikiGallery.prototype._setupLazyLoad = function () {
     var self = this;
     if (!this._options.lazyLoad || !('IntersectionObserver' in window)) {
-      // Fallback: load all immediately
       this._items.forEach(function (item) {
         if (item.img) item.img.classList.add('neiki-loaded');
       });
@@ -241,13 +283,8 @@
             img.src = lazySrc;
             img.removeAttribute('data-src');
           }
-          img.addEventListener('load', function () {
-            img.classList.add('neiki-loaded');
-          });
-          // Already cached
-          if (img.complete && img.naturalWidth) {
-            img.classList.add('neiki-loaded');
-          }
+          img.addEventListener('load', function () { img.classList.add('neiki-loaded'); });
+          if (img.complete && img.naturalWidth) img.classList.add('neiki-loaded');
           self._observer.unobserve(img);
         }
       });
@@ -255,18 +292,100 @@
 
     this._items.forEach(function (item) {
       if (item.img) {
-        // If img already has a real src and is loaded, mark it
-        if (item.img.complete && item.img.naturalWidth) {
-          item.img.classList.add('neiki-loaded');
+        var img = item.img;
+        if (img.complete && img.naturalWidth) {
+          img.classList.add('neiki-loaded');
         } else {
-          self._observer.observe(item.img);
-          // Also listen for load in case it's not lazy
-          item.img.addEventListener('load', function () {
-            item.img.classList.add('neiki-loaded');
-          });
+          self._observer.observe(img);
+          img.addEventListener('load', function () { img.classList.add('neiki-loaded'); });
+          img.addEventListener('error', function () { img.classList.add('neiki-loaded'); });
+          // Fallback: if image loaded between checks, ensure class is added
+          setTimeout(function () {
+            if (img.complete && !img.classList.contains('neiki-loaded')) {
+              img.classList.add('neiki-loaded');
+            }
+          }, 200);
+          // Long fallback: force visible after 3s regardless
+          setTimeout(function () {
+            if (!img.classList.contains('neiki-loaded')) {
+              img.classList.add('neiki-loaded');
+            }
+          }, 3000);
         }
       }
     });
+  };
+
+  /* ========================================================================
+     Staggered Entrance
+     ======================================================================== */
+
+  NeikiGallery.prototype._setupStagger = function () {
+    if (!this._options.stagger) return;
+    var items = $$(':scope > a, :scope > .neiki-item', this._container);
+    var delay = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--neiki-stagger-delay')) || 0.04;
+    for (var i = 0; i < items.length; i++) {
+      items[i].style.animationDelay = (i * delay) + 's';
+    }
+    // Force reflow so the browser registers the delays before animation starts
+    void this._container.offsetHeight;
+    this._container.classList.add('neiki-gallery--stagger');
+  };
+
+  /* ========================================================================
+     Filter
+     ======================================================================== */
+
+  NeikiGallery.prototype._setupFilter = function () {
+    if (!this._options.filter) return;
+
+    var allTags = {};
+    this._items.forEach(function (item) {
+      item.tags.forEach(function (t) { allTags[t] = true; });
+    });
+
+    var tags = Object.keys(allTags);
+    if (tags.length === 0) return;
+
+    this._filterBar = createElement('div', 'neiki-filter-bar');
+    var allBtn = createElement('button', 'neiki-filter-btn neiki-filter--active', { type: 'button' }, 'All');
+    this._filterBar.appendChild(allBtn);
+
+    var self = this;
+    this._activeFilter = null;
+
+    allBtn.addEventListener('click', function () { self._applyFilter(null); });
+
+    tags.forEach(function (tag) {
+      var btn = createElement('button', 'neiki-filter-btn', { type: 'button' }, tag);
+      btn.addEventListener('click', function () { self._applyFilter(tag); });
+      self._filterBar.appendChild(btn);
+    });
+
+    this._container.parentNode.insertBefore(this._filterBar, this._container);
+  };
+
+  NeikiGallery.prototype._applyFilter = function (tag) {
+    this._activeFilter = tag;
+
+    // Update button active state
+    var buttons = $$('.neiki-filter-btn', this._filterBar);
+    buttons.forEach(function (btn) {
+      var isAll = btn.textContent === 'All';
+      btn.classList.toggle('neiki-filter--active', tag === null ? isAll : btn.textContent === tag);
+    });
+
+    // Show/hide items
+    var self = this;
+    this._items.forEach(function (item) {
+      if (tag === null || item.tags.indexOf(tag) !== -1) {
+        item.element.classList.remove('neiki-filter-hidden');
+      } else {
+        item.element.classList.add('neiki-filter-hidden');
+      }
+    });
+
+    this._emit('filter', tag);
   };
 
   /* ========================================================================
@@ -284,7 +403,6 @@
       tabindex: '-1'
     });
 
-    // Apply theme
     if (opts.theme) {
       this._lightbox.setAttribute('data-theme', opts.theme);
     }
@@ -297,12 +415,24 @@
       this._lightbox.appendChild(this._topbar);
     }
 
-    // Close button
-    this._closeBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__close', {
-      'aria-label': 'Close lightbox',
+    // Floating toolbar (replaces individual close/fullscreen buttons)
+    this._toolbar = createElement('div', 'neiki-lightbox__toolbar');
+
+    // Slideshow button
+    this._playBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__play', {
+      'aria-label': 'Toggle slideshow',
       type: 'button'
-    }, ICONS.close);
-    this._lightbox.appendChild(this._closeBtn);
+    }, ICONS.play);
+    this._toolbar.appendChild(this._playBtn);
+
+    // Share button
+    if (opts.share) {
+      this._shareBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__share', {
+        'aria-label': 'Share image',
+        type: 'button'
+      }, ICONS.share);
+      this._toolbar.appendChild(this._shareBtn);
+    }
 
     // Fullscreen button
     if (opts.fullscreen) {
@@ -310,8 +440,17 @@
         'aria-label': 'Toggle fullscreen',
         type: 'button'
       }, ICONS.fullscreen);
-      this._lightbox.appendChild(this._fsBtn);
+      this._toolbar.appendChild(this._fsBtn);
     }
+
+    // Close button
+    this._closeBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__close', {
+      'aria-label': 'Close lightbox',
+      type: 'button'
+    }, ICONS.close);
+    this._toolbar.appendChild(this._closeBtn);
+
+    this._lightbox.appendChild(this._toolbar);
 
     // Prev / Next
     this._prevBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__prev', {
@@ -323,20 +462,11 @@
       type: 'button'
     }, ICONS.next);
 
-    // Stage (image area)
+    // Stage
     this._stage = createElement('div', 'neiki-lightbox__stage');
-
-    // Slide wrapper (for slide transition)
     this._slideWrapper = createElement('div', 'neiki-lightbox__slide-wrapper');
-
-    // Spinner
     this._spinner = createElement('div', 'neiki-lightbox__spinner neiki-hidden');
-
-    // Image
-    this._image = createElement('img', 'neiki-lightbox__image', {
-      alt: '',
-      draggable: 'false'
-    });
+    this._image = createElement('img', 'neiki-lightbox__image', { alt: '', draggable: 'false' });
 
     this._slideWrapper.appendChild(this._spinner);
     this._slideWrapper.appendChild(this._image);
@@ -344,6 +474,10 @@
     this._stage.appendChild(this._slideWrapper);
     this._stage.appendChild(this._nextBtn);
     this._lightbox.appendChild(this._stage);
+
+    // Slideshow progress bar
+    this._progressBar = createElement('div', 'neiki-lightbox__progress');
+    this._stage.appendChild(this._progressBar);
 
     // Caption
     if (opts.captions) {
@@ -376,11 +510,23 @@
       this._lightbox.appendChild(this._thumbsContainer);
     }
 
+    // Share popup
+    if (opts.share) {
+      this._sharePopup = createElement('div', 'neiki-share');
+      var shareCopyBtn = createElement('button', 'neiki-share__btn', { type: 'button' }, ICONS.link + ' Copy link');
+      var shareDownloadBtn = createElement('button', 'neiki-share__btn', { type: 'button' }, ICONS.download + ' Download');
+      this._sharePopup.appendChild(shareCopyBtn);
+      this._sharePopup.appendChild(shareDownloadBtn);
+      this._lightbox.appendChild(this._sharePopup);
+      this._shareCopyBtn = shareCopyBtn;
+      this._shareDownloadBtn = shareDownloadBtn;
+    }
+
     document.body.appendChild(this._lightbox);
   };
 
   /* ========================================================================
-     Lightbox — Bind Events
+     Bind Events
      ======================================================================== */
 
   NeikiGallery.prototype._bindEvents = function () {
@@ -390,16 +536,24 @@
     this._items.forEach(function (item, index) {
       item.element.addEventListener('click', function (e) {
         e.preventDefault();
+        if (self._options.batchSelect && e.shiftKey) {
+          self._toggleSelect(index);
+          return;
+        }
         self.open(index);
       });
     });
 
-    // Close button
+    // Toolbar buttons
     this._closeBtn.addEventListener('click', function () { self.close(); });
-
-    // Nav buttons
     this._prevBtn.addEventListener('click', function (e) { e.stopPropagation(); self.prev(); });
     this._nextBtn.addEventListener('click', function (e) { e.stopPropagation(); self.next(); });
+
+    // Slideshow
+    this._playBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      self.toggleSlideshow();
+    });
 
     // Fullscreen
     if (this._fsBtn) {
@@ -409,11 +563,37 @@
       });
     }
 
+    // Share
+    if (this._shareBtn) {
+      this._shareBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        self._toggleSharePopup();
+      });
+    }
+
+    if (this._shareCopyBtn) {
+      this._shareCopyBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        self._shareCopyLink();
+      });
+    }
+
+    if (this._shareDownloadBtn) {
+      this._shareDownloadBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        self._shareDownload();
+      });
+    }
+
     // Zoom on image click
     if (this._options.zoom) {
       this._image.addEventListener('click', function (e) {
         e.stopPropagation();
-        self._toggleZoom();
+        if (self._options.contextualZoom) {
+          self._toggleContextualZoom(e);
+        } else {
+          self._toggleZoom();
+        }
       });
     }
 
@@ -424,7 +604,7 @@
       });
     }
 
-    // Click on stage background to close (but not on image / buttons)
+    // Click on stage background to close
     this._stage.addEventListener('click', function (e) {
       if (e.target === self._stage || e.target === self._slideWrapper) {
         self.close();
@@ -450,15 +630,13 @@
     document.addEventListener('webkitfullscreenchange', this._boundHandlers.fullscreenchange);
   };
 
-  /**
-   * Keyboard handler.
-   */
   NeikiGallery.prototype._onKeyDown = function (e) {
     if (!this._isOpen) return;
 
     switch (e.key) {
       case 'Escape':
         e.preventDefault();
+        if (this._shareVisible) { this._toggleSharePopup(); return; }
         this.close();
         break;
       case 'ArrowLeft':
@@ -481,19 +659,16 @@
         e.preventDefault();
         this._toggleFullscreen();
         break;
+      case ' ':
+        e.preventDefault();
+        this.toggleSlideshow();
+        break;
     }
   };
 
-  /**
-   * Touch swipe support (pointer events with fallback to touch events).
-   */
   NeikiGallery.prototype._setupTouch = function () {
     var self = this;
-    var startX = 0;
-    var startY = 0;
-    var distX = 0;
-    var tracking = false;
-    var threshold = 50;
+    var startX = 0, startY = 0, distX = 0, tracking = false, threshold = 50;
 
     function onStart(e) {
       if (!self._isOpen || self._isZoomed) return;
@@ -509,7 +684,6 @@
       var point = e.touches ? e.touches[0] : e;
       distX = point.clientX - startX;
       var distY = point.clientY - startY;
-      // If horizontal swipe is dominant, prevent scroll
       if (Math.abs(distX) > Math.abs(distY) && Math.abs(distX) > 10) {
         e.preventDefault();
       }
@@ -518,25 +692,21 @@
     function onEnd() {
       if (!tracking) return;
       tracking = false;
-      if (distX > threshold) {
-        self.prev();
-      } else if (distX < -threshold) {
-        self.next();
-      }
+      if (distX > threshold) self.prev();
+      else if (distX < -threshold) self.next();
     }
 
     this._stage.addEventListener('touchstart', onStart, { passive: true });
     this._stage.addEventListener('touchmove', onMove, { passive: false });
     this._stage.addEventListener('touchend', onEnd, { passive: true });
 
-    // Store refs for cleanup
     this._boundHandlers.touchstart = onStart;
     this._boundHandlers.touchmove = onMove;
     this._boundHandlers.touchend = onEnd;
   };
 
   /* ========================================================================
-     Lightbox — Navigation Logic
+     Navigation
      ======================================================================== */
 
   NeikiGallery.prototype._goTo = function (index, skipHash) {
@@ -544,7 +714,6 @@
 
     var len = this._items.length;
 
-    // Handle loop / bounds
     if (this._options.loop) {
       index = ((index % len) + len) % len;
     } else {
@@ -552,32 +721,30 @@
       if (index >= len) index = len - 1;
     }
 
-    if (index === this._currentIndex && this._isOpen && this._image.src) {
-      // Already showing this image
-      return;
-    }
+    if (index === this._currentIndex && this._isOpen && this._image.src) return;
 
     var prevIndex = this._currentIndex;
     this._currentIndex = index;
     var item = this._items[index];
 
     // Reset zoom
-    if (this._isZoomed) this._toggleZoom();
+    this._resetZoom();
 
-    // Update nav button visibility when not looping
+    // Close share popup
+    if (this._shareVisible) this._toggleSharePopup();
+
+    // Update nav
     this._updateNavButtons();
 
-    // Show spinner
+    // Spinner
     this._spinner.classList.remove('neiki-hidden');
 
-    // Load image
     var self = this;
     var img = this._image;
 
-    // Transition class for animation direction (slide)
+    // Slide transition
     if (this._options.transition === 'slide') {
       var direction = index > prevIndex ? 1 : -1;
-      // If looping from last to first or vice versa, determine visually correct direction
       if (this._options.loop) {
         if (prevIndex === len - 1 && index === 0) direction = 1;
         if (prevIndex === 0 && index === len - 1) direction = -1;
@@ -591,29 +758,26 @@
         });
       });
     } else {
-      // Fade
       img.classList.add('neiki-entering');
       img.classList.remove('neiki-active');
     }
 
-    // Set src
     img.setAttribute('alt', item.caption || '');
 
-    // Preload into a temp image to catch load event correctly
     var tempImg = new Image();
-    tempImg.onload = function () {
+    var onLoad = function () {
       img.src = item.src;
       self._spinner.classList.add('neiki-hidden');
       if (self._options.transition === 'fade') {
-        // Small delay to trigger CSS transition
         requestAnimationFrame(function () {
           img.classList.remove('neiki-entering');
           img.classList.add('neiki-active');
         });
       }
     };
+    tempImg.onload = onLoad;
     tempImg.onerror = function () {
-      img.src = item.src; // show broken image
+      img.src = item.src;
       self._spinner.classList.add('neiki-hidden');
       if (self._options.transition === 'fade') {
         requestAnimationFrame(function () {
@@ -623,18 +787,7 @@
       }
     };
     tempImg.src = item.src;
-
-    // If already cached, fire immediately
-    if (tempImg.complete) {
-      img.src = item.src;
-      self._spinner.classList.add('neiki-hidden');
-      if (self._options.transition === 'fade') {
-        requestAnimationFrame(function () {
-          img.classList.remove('neiki-entering');
-          img.classList.add('neiki-active');
-        });
-      }
-    }
+    if (tempImg.complete) onLoad();
 
     // Counter
     if (this._counter) {
@@ -652,7 +805,6 @@
         btn.classList.toggle('neiki-thumb--active', idx === index);
         btn.setAttribute('aria-selected', idx === index ? 'true' : 'false');
       });
-      // Scroll active thumbnail into view
       var activeThumb = this._thumbButtons[index];
       if (activeThumb && this._thumbsContainer) {
         activeThumb.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
@@ -660,14 +812,14 @@
     }
 
     // Hash
-    if (this._options.hashNavigation && !skipHash) {
-      this._setHash(index);
-    }
+    if (this._options.hashNavigation && !skipHash) this._setHash(index);
 
     // Preload adjacent
     this._preloadAdjacent(index);
 
-    // Fire event
+    // Restart slideshow timer if running
+    if (this._slideshowRunning) this._startSlideshowTimer();
+
     this._emit('change', index);
   };
 
@@ -681,9 +833,6 @@
     this._nextBtn.style.display = this._currentIndex >= this._items.length - 1 ? 'none' : '';
   };
 
-  /**
-   * Preload adjacent images.
-   */
   NeikiGallery.prototype._preloadAdjacent = function (index) {
     var count = this._options.preload || 1;
     var len = this._items.length;
@@ -702,7 +851,33 @@
   NeikiGallery.prototype._toggleZoom = function () {
     if (!this._options.zoom) return;
     this._isZoomed = !this._isZoomed;
+    this._image.classList.remove('neiki-zoom-pan');
     this._image.classList.toggle('neiki-zoomed', this._isZoomed);
+  };
+
+  NeikiGallery.prototype._toggleContextualZoom = function (e) {
+    if (!this._options.zoom) return;
+
+    if (this._isZoomed) {
+      this._resetZoom();
+      return;
+    }
+
+    this._isZoomed = true;
+    var rect = this._image.getBoundingClientRect();
+    var x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+    var y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+    this._image.style.setProperty('--neiki-zoom-x', x + '%');
+    this._image.style.setProperty('--neiki-zoom-y', y + '%');
+    this._image.classList.add('neiki-zoom-pan');
+  };
+
+  NeikiGallery.prototype._resetZoom = function () {
+    if (!this._isZoomed) return;
+    this._isZoomed = false;
+    this._image.classList.remove('neiki-zoomed', 'neiki-zoom-pan');
+    this._image.style.removeProperty('--neiki-zoom-x');
+    this._image.style.removeProperty('--neiki-zoom-y');
   };
 
   /* ========================================================================
@@ -711,20 +886,13 @@
 
   NeikiGallery.prototype._toggleFullscreen = function () {
     if (!this._options.fullscreen) return;
-
     if (!document.fullscreenElement && !document.webkitFullscreenElement) {
       var el = this._lightbox;
-      if (el.requestFullscreen) {
-        el.requestFullscreen();
-      } else if (el.webkitRequestFullscreen) {
-        el.webkitRequestFullscreen();
-      }
+      if (el.requestFullscreen) el.requestFullscreen();
+      else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
     } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      }
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     }
   };
 
@@ -733,6 +901,156 @@
     if (this._fsBtn) {
       this._fsBtn.innerHTML = this._isFullscreen ? ICONS.exitFullscreen : ICONS.fullscreen;
     }
+  };
+
+  /* ========================================================================
+     Slideshow / Autoplay
+     ======================================================================== */
+
+  NeikiGallery.prototype.toggleSlideshow = function () {
+    if (this._slideshowRunning) {
+      this.stopSlideshow();
+    } else {
+      this.startSlideshow();
+    }
+  };
+
+  NeikiGallery.prototype.startSlideshow = function () {
+    if (this._slideshowRunning) return;
+    this._slideshowRunning = true;
+    this._playBtn.innerHTML = ICONS.pause;
+    this._playBtn.setAttribute('aria-label', 'Pause slideshow');
+    this._startSlideshowTimer();
+    this._emit('slideshowStart');
+  };
+
+  NeikiGallery.prototype.stopSlideshow = function () {
+    if (!this._slideshowRunning) return;
+    this._slideshowRunning = false;
+    this._playBtn.innerHTML = ICONS.play;
+    this._playBtn.setAttribute('aria-label', 'Start slideshow');
+    this._clearSlideshowTimer();
+    this._progressBar.classList.remove('neiki-progress--running');
+    this._progressBar.style.width = '0%';
+    this._emit('slideshowStop');
+  };
+
+  NeikiGallery.prototype._startSlideshowTimer = function () {
+    var self = this;
+    this._clearSlideshowTimer();
+
+    var interval = this._options.slideshowInterval;
+
+    // Reset progress bar
+    this._progressBar.classList.remove('neiki-progress--running');
+    this._progressBar.style.width = '0%';
+
+    // Force reflow then animate
+    void this._progressBar.offsetWidth;
+    this._progressBar.style.transitionDuration = interval + 'ms';
+    this._progressBar.classList.add('neiki-progress--running');
+    this._progressBar.style.width = '100%';
+
+    this._slideshowTimer = setTimeout(function () {
+      if (!self._slideshowRunning || !self._isOpen) return;
+      var nextIndex = self._currentIndex + 1;
+      if (nextIndex >= self._items.length) {
+        if (self._options.loop) {
+          nextIndex = 0;
+        } else {
+          self.stopSlideshow();
+          return;
+        }
+      }
+      self._goTo(nextIndex);
+    }, interval);
+  };
+
+  NeikiGallery.prototype._clearSlideshowTimer = function () {
+    if (this._slideshowTimer) {
+      clearTimeout(this._slideshowTimer);
+      this._slideshowTimer = null;
+    }
+  };
+
+  /* ========================================================================
+     Share
+     ======================================================================== */
+
+  NeikiGallery.prototype._toggleSharePopup = function () {
+    this._shareVisible = !this._shareVisible;
+    if (this._sharePopup) {
+      this._sharePopup.classList.toggle('neiki-share--visible', this._shareVisible);
+    }
+  };
+
+  NeikiGallery.prototype._shareCopyLink = function () {
+    var item = this._items[this._currentIndex];
+    if (!item) return;
+
+    var url = item.src;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function () {
+        showToast('Link copied!');
+      });
+    } else {
+      // Fallback
+      var input = document.createElement('input');
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      showToast('Link copied!');
+    }
+    this._toggleSharePopup();
+  };
+
+  NeikiGallery.prototype._shareDownload = function () {
+    var item = this._items[this._currentIndex];
+    if (!item) return;
+
+    var a = document.createElement('a');
+    a.href = item.src;
+    a.download = item.caption || 'image';
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    this._toggleSharePopup();
+  };
+
+  /* ========================================================================
+     Batch Select
+     ======================================================================== */
+
+  NeikiGallery.prototype._toggleSelect = function (index) {
+    var pos = this._selectedIndices.indexOf(index);
+    if (pos === -1) {
+      this._selectedIndices.push(index);
+      this._items[index].element.classList.add('neiki-selected');
+    } else {
+      this._selectedIndices.splice(pos, 1);
+      this._items[index].element.classList.remove('neiki-selected');
+    }
+    this._emit('select', this._selectedIndices.slice());
+  };
+
+  NeikiGallery.prototype.getSelected = function () {
+    var self = this;
+    return this._selectedIndices.map(function (i) {
+      return { index: i, src: self._items[i].src, caption: self._items[i].caption };
+    });
+  };
+
+  NeikiGallery.prototype.clearSelection = function () {
+    var self = this;
+    this._selectedIndices.forEach(function (i) {
+      self._items[i].element.classList.remove('neiki-selected');
+    });
+    this._selectedIndices = [];
+    this._emit('select', []);
   };
 
   /* ========================================================================
@@ -782,9 +1100,6 @@
      Public API
      ======================================================================== */
 
-  /**
-   * Open the lightbox at a given index.
-   */
   NeikiGallery.prototype.open = function (index) {
     if (this._destroyed) return;
     if (typeof index !== 'number') index = 0;
@@ -792,82 +1107,60 @@
     if (index >= this._items.length) index = this._items.length - 1;
 
     this._isOpen = true;
-
-    // Prevent body scroll
     document.body.style.overflow = 'hidden';
-
-    // Show overlay
     this._lightbox.classList.add('neiki-lightbox--visible');
-
-    // Focus the lightbox for keyboard events
     this._lightbox.focus();
 
-    // Force a fresh load (reset current to -1 so _goTo actually proceeds)
     this._currentIndex = -1;
     this._goTo(index);
+
+    // Auto-start slideshow if option is set
+    if (this._options.slideshow) this.startSlideshow();
 
     this._emit('open', index);
   };
 
-  /**
-   * Close the lightbox.
-   */
   NeikiGallery.prototype.close = function () {
     if (!this._isOpen) return;
     this._isOpen = false;
 
-    // Exit fullscreen if active
+    // Stop slideshow
+    this.stopSlideshow();
+
+    // Exit fullscreen
     if (this._isFullscreen) {
       if (document.exitFullscreen) document.exitFullscreen();
       else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     }
 
     // Reset zoom
-    if (this._isZoomed) {
-      this._isZoomed = false;
-      this._image.classList.remove('neiki-zoomed');
-    }
+    this._resetZoom();
 
-    // Restore body scroll
+    // Close share
+    if (this._shareVisible) this._toggleSharePopup();
+
     document.body.style.overflow = '';
-
-    // Hide overlay
     this._lightbox.classList.remove('neiki-lightbox--visible');
 
-    // Clear hash
-    if (this._options.hashNavigation) {
-      this._clearHash();
-    }
+    if (this._options.hashNavigation) this._clearHash();
 
     this._emit('close');
   };
 
-  /**
-   * Go to the next image.
-   */
   NeikiGallery.prototype.next = function () {
     this._goTo(this._currentIndex + 1);
   };
 
-  /**
-   * Go to the previous image.
-   */
   NeikiGallery.prototype.prev = function () {
     this._goTo(this._currentIndex - 1);
   };
 
-  /**
-   * Register an event listener.
-   */
   NeikiGallery.prototype.on = function (event, callback) {
     if (!this._events[event]) this._events[event] = [];
     this._events[event].push(callback);
     return this;
   };
 
-  /**
-   * Remove an event listener.
-   */
   NeikiGallery.prototype.off = function (event, callback) {
     var listeners = this._events[event];
     if (listeners) {
@@ -876,55 +1169,136 @@
     return this;
   };
 
-  /**
-   * Destroy the gallery instance — remove all DOM, listeners, observers.
-   */
+  NeikiGallery.prototype.filter = function (tag) {
+    this._applyFilter(tag || null);
+  };
+
   NeikiGallery.prototype.destroy = function () {
     if (this._destroyed) return;
     this._destroyed = true;
 
-    // Close if open
     if (this._isOpen) this.close();
 
-    // Remove keyboard listener
     if (this._boundHandlers.keydown) {
       document.removeEventListener('keydown', this._boundHandlers.keydown);
     }
-
-    // Remove hashchange listener
     if (this._boundHandlers.hashchange) {
       window.removeEventListener('hashchange', this._boundHandlers.hashchange);
     }
-
-    // Remove fullscreen listener
     if (this._boundHandlers.fullscreenchange) {
       document.removeEventListener('fullscreenchange', this._boundHandlers.fullscreenchange);
       document.removeEventListener('webkitfullscreenchange', this._boundHandlers.fullscreenchange);
     }
-
-    // Remove touch listeners
     if (this._boundHandlers.touchstart) {
       this._stage.removeEventListener('touchstart', this._boundHandlers.touchstart);
       this._stage.removeEventListener('touchmove', this._boundHandlers.touchmove);
       this._stage.removeEventListener('touchend', this._boundHandlers.touchend);
     }
 
-    // Disconnect intersection observer
     if (this._observer) {
       this._observer.disconnect();
       this._observer = null;
     }
 
-    // Remove lightbox DOM
     if (this._lightbox && this._lightbox.parentNode) {
       this._lightbox.parentNode.removeChild(this._lightbox);
     }
 
-    // Remove grid classes
-    this._container.classList.remove('neiki-gallery', 'neiki-gallery--masonry', 'neiki-gallery--grid');
+    if (this._filterBar && this._filterBar.parentNode) {
+      this._filterBar.parentNode.removeChild(this._filterBar);
+    }
 
-    // Clear event listeners
+    this._container.classList.remove('neiki-gallery', 'neiki-gallery--masonry', 'neiki-gallery--grid', 'neiki-gallery--mosaic', 'neiki-gallery--filmstrip', 'neiki-gallery--stagger');
+
     this._events = {};
+  };
+
+  /* ========================================================================
+     Comparison Slider (static utility)
+     ======================================================================== */
+
+  NeikiGallery.compare = function (container, options) {
+    if (typeof container === 'string') container = $(container);
+    if (!container) return;
+
+    var opts = mergeOptions({
+      before: '',
+      after: '',
+      labelBefore: 'Before',
+      labelAfter: 'After',
+      startPosition: 50
+    }, options);
+
+    container.classList.add('neiki-compare');
+    container.innerHTML = '';
+
+    var beforeImg = createElement('img', 'neiki-compare__before', { src: opts.before, alt: opts.labelBefore, draggable: 'false' });
+    var afterImg = createElement('img', 'neiki-compare__after', { src: opts.after, alt: opts.labelAfter, draggable: 'false' });
+    var handle = createElement('div', 'neiki-compare__handle');
+    var labelBefore = createElement('span', 'neiki-compare__label neiki-compare__label--before', {}, opts.labelBefore);
+    var labelAfter = createElement('span', 'neiki-compare__label neiki-compare__label--after', {}, opts.labelAfter);
+
+    container.appendChild(beforeImg);
+    container.appendChild(afterImg);
+    container.appendChild(handle);
+    container.appendChild(labelBefore);
+    container.appendChild(labelAfter);
+
+    var pos = opts.startPosition;
+    setPosition(pos);
+
+    function setPosition(pct) {
+      pct = Math.max(0, Math.min(100, pct));
+      pos = pct;
+      afterImg.style.clipPath = 'inset(0 0 0 ' + pct + '%)';
+      handle.style.left = pct + '%';
+    }
+
+    var dragging = false;
+
+    function getPosition(e) {
+      var rect = container.getBoundingClientRect();
+      var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      return ((clientX - rect.left) / rect.width) * 100;
+    }
+
+    function onStart(e) {
+      dragging = true;
+      setPosition(getPosition(e));
+      e.preventDefault();
+    }
+
+    function onMove(e) {
+      if (!dragging) return;
+      setPosition(getPosition(e));
+      e.preventDefault();
+    }
+
+    function onEnd() {
+      dragging = false;
+    }
+
+    container.addEventListener('mousedown', onStart);
+    container.addEventListener('touchstart', onStart, { passive: false });
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('touchmove', onMove, { passive: false });
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchend', onEnd);
+
+    return {
+      setPosition: setPosition,
+      getPosition: function () { return pos; },
+      destroy: function () {
+        container.removeEventListener('mousedown', onStart);
+        container.removeEventListener('touchstart', onStart);
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('touchmove', onMove);
+        window.removeEventListener('mouseup', onEnd);
+        window.removeEventListener('touchend', onEnd);
+        container.innerHTML = '';
+        container.classList.remove('neiki-compare');
+      }
+    };
   };
 
   /* ========================================================================
@@ -934,21 +1308,17 @@
   function autoInit() {
     var galleries = $$('[data-neiki-gallery]');
     galleries.forEach(function (el) {
-      // Don't double-init
       if (el._neikiGallery) return;
       el._neikiGallery = new NeikiGallery(el);
     });
   }
 
-  // Auto-init when DOM is ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', autoInit);
   } else {
-    // DOM already loaded (script at bottom or defer)
     autoInit();
   }
 
-  // Expose auto-init for dynamic content
   NeikiGallery.autoInit = autoInit;
 
   return NeikiGallery;

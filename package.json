@@ -1,6 +1,6 @@
 {
   "name": "neiki-gallery",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Vanilla JavaScript image gallery and lightbox — zero dependencies",
   "keywords": [
     "gallery",
@@ -8,10 +8,16 @@
     "image-gallery",
     "masonry",
     "grid",
+    "mosaic",
+    "filmstrip",
+    "slideshow",
+    "comparison-slider",
     "vanilla-js",
     "responsive",
     "zoom",
-    "fullscreen"
+    "fullscreen",
+    "glassmorphism",
+    "filtering"
   ],
   "main": "dist/neiki-gallery.js",
   "exports": {

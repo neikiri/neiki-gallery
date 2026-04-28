@@ -5,6 +5,7 @@
 | Version | Supported |
 |---------|-----------|
 | 1.0.x   | ✅ Yes    |
+| 2.0.x   | ✅ Yes    |
 
 Only the latest release is actively supported with security updates.
 

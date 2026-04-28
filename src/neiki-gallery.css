@@ -1,7 +1,7 @@
 /* ==========================================================================
-   Neiki Gallery — CSS
+   Neiki Gallery v2.0.0 — CSS
    A vanilla JS image gallery/lightbox library.
-   https://github.com/neiki-gallery
+   https://github.com/neikiri/neiki-gallery
 
    All styles use the .neiki- prefix and CSS custom properties (--neiki-*)
    for easy theming. No external dependencies.
@@ -14,38 +14,45 @@
 :root {
   /* Grid */
   --neiki-columns: 4;
-  --neiki-gap: 12px;
-  --neiki-border-radius: 6px;
+  --neiki-gap: 14px;
+  --neiki-border-radius: 14px;
+
+  /* Accent */
+  --neiki-accent: #3b82f6;
+  --neiki-accent-hover: #2563eb;
 
   /* Overlay / Lightbox */
-  --neiki-overlay-bg: rgba(0, 0, 0, 0.92);
+  --neiki-overlay-bg: rgba(8, 8, 12, 0.85);
+  --neiki-overlay-backdrop: blur(24px) saturate(1.2);
   --neiki-lightbox-max-width: 90vw;
   --neiki-lightbox-max-height: 85vh;
 
   /* Controls */
-  --neiki-btn-size: 48px;
-  --neiki-btn-bg: rgba(255, 255, 255, 0.12);
-  --neiki-btn-bg-hover: rgba(255, 255, 255, 0.25);
+  --neiki-btn-size: 44px;
+  --neiki-btn-bg: rgba(255, 255, 255, 0.1);
+  --neiki-btn-bg-hover: rgba(255, 255, 255, 0.2);
   --neiki-btn-color: #fff;
-  --neiki-btn-border-radius: 50%;
+  --neiki-btn-border-radius: 12px;
+  --neiki-btn-backdrop: blur(12px) saturate(1.4);
 
   /* Text */
+  --neiki-font: system-ui, -apple-system, 'Segoe UI', sans-serif;
   --neiki-caption-color: #fff;
-  --neiki-caption-font-size: 15px;
+  --neiki-caption-font-size: 14px;
   --neiki-counter-color: rgba(255, 255, 255, 0.7);
-  --neiki-counter-font-size: 13px;
+  --neiki-counter-font-size: 12px;
 
   /* Thumbnails */
-  --neiki-thumb-size: 56px;
+  --neiki-thumb-size: 52px;
   --neiki-thumb-gap: 6px;
-  --neiki-thumb-border-radius: 4px;
-  --neiki-thumb-active-border: 2px solid #fff;
+  --neiki-thumb-border-radius: 8px;
+  --neiki-thumb-active-border: 2px solid var(--neiki-accent);
   --neiki-thumb-opacity: 0.5;
   --neiki-thumb-active-opacity: 1;
 
   /* Spinner */
-  --neiki-spinner-size: 40px;
-  --neiki-spinner-color: #fff;
+  --neiki-spinner-size: 36px;
+  --neiki-spinner-color: var(--neiki-accent);
   --neiki-spinner-width: 3px;
 
   /* Transitions */
@@ -54,6 +61,13 @@
 
   /* Zoom */
   --neiki-zoom-scale: 2;
+
+  /* Stagger */
+  --neiki-stagger-delay: 0.04s;
+
+  /* Hover */
+  --neiki-hover-lift: -4px;
+  --neiki-hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
 }
 
 /* --------------------------------------------------------------------------
@@ -63,35 +77,37 @@
 /* Dark theme (default) */
 [data-theme="dark"],
 .neiki-gallery[data-theme="dark"] {
-  --neiki-overlay-bg: rgba(0, 0, 0, 0.92);
-  --neiki-btn-bg: rgba(255, 255, 255, 0.12);
-  --neiki-btn-bg-hover: rgba(255, 255, 255, 0.25);
+  --neiki-overlay-bg: rgba(8, 8, 12, 0.85);
+  --neiki-btn-bg: rgba(255, 255, 255, 0.1);
+  --neiki-btn-bg-hover: rgba(255, 255, 255, 0.2);
   --neiki-btn-color: #fff;
   --neiki-caption-color: #fff;
   --neiki-counter-color: rgba(255, 255, 255, 0.7);
-  --neiki-spinner-color: #fff;
-  --neiki-thumb-active-border: 2px solid #fff;
+  --neiki-spinner-color: var(--neiki-accent);
+  --neiki-thumb-active-border: 2px solid var(--neiki-accent);
 }
 
 /* Light theme */
 [data-theme="light"],
 .neiki-gallery[data-theme="light"] {
-  --neiki-overlay-bg: rgba(255, 255, 255, 0.96);
-  --neiki-btn-bg: rgba(0, 0, 0, 0.08);
-  --neiki-btn-bg-hover: rgba(0, 0, 0, 0.16);
-  --neiki-btn-color: #222;
-  --neiki-caption-color: #222;
-  --neiki-counter-color: rgba(0, 0, 0, 0.55);
-  --neiki-spinner-color: #222;
-  --neiki-thumb-active-border: 2px solid #222;
+  --neiki-overlay-bg: rgba(245, 245, 247, 0.88);
+  --neiki-btn-bg: rgba(0, 0, 0, 0.06);
+  --neiki-btn-bg-hover: rgba(0, 0, 0, 0.12);
+  --neiki-btn-color: #1a1a1a;
+  --neiki-caption-color: #1a1a1a;
+  --neiki-counter-color: rgba(0, 0, 0, 0.5);
+  --neiki-spinner-color: var(--neiki-accent);
+  --neiki-thumb-active-border: 2px solid var(--neiki-accent);
+  --neiki-hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
 }
 
 /* --------------------------------------------------------------------------
-   3. Gallery Grid — Masonry Layout (CSS Columns)
+   3. Base / Box-sizing
    -------------------------------------------------------------------------- */
 
 .neiki-gallery {
   box-sizing: border-box;
+  font-family: var(--neiki-font);
 }
 
 .neiki-gallery *,
@@ -100,22 +116,28 @@
   box-sizing: inherit;
 }
 
+/* --------------------------------------------------------------------------
+   4. Gallery Grid — Masonry Layout (CSS Columns)
+   -------------------------------------------------------------------------- */
+
 .neiki-gallery--masonry {
   column-count: var(--neiki-columns, 4);
-  column-gap: var(--neiki-gap, 10px);
+  column-gap: var(--neiki-gap, 14px);
 }
 
 .neiki-gallery--masonry > a,
 .neiki-gallery--masonry > .neiki-item {
   display: inline-block;
   width: 100%;
-  margin-bottom: var(--neiki-gap, 10px);
+  margin-bottom: var(--neiki-gap, 14px);
   break-inside: avoid;
-  border-radius: var(--neiki-border-radius, 6px);
+  border-radius: var(--neiki-border-radius, 14px);
   overflow: hidden;
   cursor: pointer;
   position: relative;
   text-decoration: none;
+  transition: transform 0.35s var(--neiki-transition-easing),
+              box-shadow 0.35s var(--neiki-transition-easing);
 }
 
 .neiki-gallery--masonry > a > img,
@@ -123,15 +145,22 @@
   display: block;
   width: 100%;
   height: auto;
-  border-radius: var(--neiki-border-radius, 6px);
-  transition: transform var(--neiki-transition-duration) var(--neiki-transition-easing),
-              opacity var(--neiki-transition-duration) var(--neiki-transition-easing);
+  border-radius: var(--neiki-border-radius, 14px);
+  transition: transform 0.4s var(--neiki-transition-easing),
+              opacity 0.5s var(--neiki-transition-easing);
   opacity: 0;
+  transform: scale(1);
 }
 
 .neiki-gallery--masonry > a > img.neiki-loaded,
 .neiki-gallery--masonry > .neiki-item > img.neiki-loaded {
   opacity: 1;
+}
+
+.neiki-gallery--masonry > a:hover,
+.neiki-gallery--masonry > .neiki-item:hover {
+  transform: translateY(var(--neiki-hover-lift));
+  box-shadow: var(--neiki-hover-shadow);
 }
 
 .neiki-gallery--masonry > a:hover > img,
@@ -140,13 +169,13 @@
 }
 
 /* --------------------------------------------------------------------------
-   4. Gallery Grid — Uniform Grid Layout (CSS Grid)
+   5. Gallery Grid — Uniform Grid Layout (CSS Grid)
    -------------------------------------------------------------------------- */
 
 .neiki-gallery--grid {
   display: grid;
   grid-template-columns: repeat(var(--neiki-columns, 4), 1fr);
-  gap: var(--neiki-gap, 10px);
+  gap: var(--neiki-gap, 14px);
 }
 
 .neiki-gallery--grid > a,
@@ -154,10 +183,12 @@
   display: block;
   position: relative;
   overflow: hidden;
-  border-radius: var(--neiki-border-radius, 6px);
+  border-radius: var(--neiki-border-radius, 14px);
   cursor: pointer;
   text-decoration: none;
   aspect-ratio: 1 / 1;
+  transition: transform 0.35s var(--neiki-transition-easing),
+              box-shadow 0.35s var(--neiki-transition-easing);
 }
 
 .neiki-gallery--grid > a > img,
@@ -166,9 +197,9 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: var(--neiki-border-radius, 6px);
-  transition: transform var(--neiki-transition-duration) var(--neiki-transition-easing),
-              opacity var(--neiki-transition-duration) var(--neiki-transition-easing);
+  border-radius: var(--neiki-border-radius, 14px);
+  transition: transform 0.4s var(--neiki-transition-easing),
+              opacity 0.5s var(--neiki-transition-easing);
   opacity: 0;
 }
 
@@ -177,40 +208,278 @@
   opacity: 1;
 }
 
+.neiki-gallery--grid > a:hover,
+.neiki-gallery--grid > .neiki-item:hover {
+  transform: translateY(var(--neiki-hover-lift));
+  box-shadow: var(--neiki-hover-shadow);
+}
+
 .neiki-gallery--grid > a:hover > img,
 .neiki-gallery--grid > .neiki-item:hover > img {
   transform: scale(1.05);
 }
 
 /* --------------------------------------------------------------------------
-   5. Responsive Columns
+   6. Gallery — Mosaic Layout
+   -------------------------------------------------------------------------- */
+
+.neiki-gallery--mosaic {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 200px;
+  gap: var(--neiki-gap, 14px);
+  grid-auto-flow: dense;
+}
+
+.neiki-gallery--mosaic > a,
+.neiki-gallery--mosaic > .neiki-item {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--neiki-border-radius, 14px);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.35s var(--neiki-transition-easing),
+              box-shadow 0.35s var(--neiki-transition-easing);
+}
+
+.neiki-gallery--mosaic > a[data-size="large"],
+.neiki-gallery--mosaic > .neiki-item[data-size="large"] {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.neiki-gallery--mosaic > a[data-size="wide"],
+.neiki-gallery--mosaic > .neiki-item[data-size="wide"] {
+  grid-column: span 2;
+}
+
+.neiki-gallery--mosaic > a[data-size="tall"],
+.neiki-gallery--mosaic > .neiki-item[data-size="tall"] {
+  grid-row: span 2;
+}
+
+.neiki-gallery--mosaic > a > img,
+.neiki-gallery--mosaic > .neiki-item > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--neiki-border-radius, 14px);
+  transition: transform 0.4s var(--neiki-transition-easing),
+              opacity 0.5s var(--neiki-transition-easing);
+  opacity: 0;
+}
+
+.neiki-gallery--mosaic > a > img.neiki-loaded,
+.neiki-gallery--mosaic > .neiki-item > img.neiki-loaded {
+  opacity: 1;
+}
+
+.neiki-gallery--mosaic > a:hover,
+.neiki-gallery--mosaic > .neiki-item:hover {
+  transform: translateY(var(--neiki-hover-lift));
+  box-shadow: var(--neiki-hover-shadow);
+}
+
+.neiki-gallery--mosaic > a:hover > img,
+.neiki-gallery--mosaic > .neiki-item:hover > img {
+  transform: scale(1.04);
+}
+
+/* --------------------------------------------------------------------------
+   7. Gallery — Filmstrip Layout
+   -------------------------------------------------------------------------- */
+
+.neiki-gallery--filmstrip {
+  display: flex;
+  gap: var(--neiki-gap, 14px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+
+.neiki-gallery--filmstrip::-webkit-scrollbar {
+  display: none;
+}
+
+.neiki-gallery--filmstrip > a,
+.neiki-gallery--filmstrip > .neiki-item {
+  flex: 0 0 auto;
+  width: 280px;
+  height: 360px;
+  scroll-snap-align: center;
+  border-radius: var(--neiki-border-radius, 14px);
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  transition: transform 0.35s var(--neiki-transition-easing),
+              box-shadow 0.35s var(--neiki-transition-easing);
+}
+
+.neiki-gallery--filmstrip > a > img,
+.neiki-gallery--filmstrip > .neiki-item > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--neiki-border-radius, 14px);
+  transition: transform 0.4s var(--neiki-transition-easing),
+              opacity 0.5s var(--neiki-transition-easing);
+  opacity: 0;
+}
+
+.neiki-gallery--filmstrip > a > img.neiki-loaded,
+.neiki-gallery--filmstrip > .neiki-item > img.neiki-loaded {
+  opacity: 1;
+}
+
+.neiki-gallery--filmstrip > a:hover,
+.neiki-gallery--filmstrip > .neiki-item:hover {
+  transform: translateY(var(--neiki-hover-lift)) scale(1.02);
+  box-shadow: var(--neiki-hover-shadow);
+}
+
+/* --------------------------------------------------------------------------
+   8. Staggered Entrance Animation
+   -------------------------------------------------------------------------- */
+
+.neiki-gallery--stagger > a,
+.neiki-gallery--stagger > .neiki-item {
+  transform: translateY(20px);
+  animation: neiki-stagger-in 0.5s var(--neiki-transition-easing) forwards;
+}
+
+@keyframes neiki-stagger-in {
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   9. Batch Select
+   -------------------------------------------------------------------------- */
+
+.neiki-gallery > a.neiki-selected,
+.neiki-gallery > .neiki-item.neiki-selected {
+  outline: 3px solid var(--neiki-accent);
+  outline-offset: -3px;
+}
+
+.neiki-gallery > a.neiki-selected::after,
+.neiki-gallery > .neiki-item.neiki-selected::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: var(--neiki-accent);
+  border-radius: 50%;
+  z-index: 5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-size: 14px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* --------------------------------------------------------------------------
+   10. Filter Bar
+   -------------------------------------------------------------------------- */
+
+.neiki-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-family: var(--neiki-font);
+}
+
+.neiki-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s var(--neiki-transition-easing);
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+.neiki-filter-btn:hover {
+  border-color: var(--neiki-accent);
+  color: var(--neiki-accent);
+}
+
+.neiki-filter-btn.neiki-filter--active {
+  background: var(--neiki-accent);
+  border-color: var(--neiki-accent);
+  color: #fff;
+}
+
+.neiki-filter-btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+}
+
+/* Filter transitions on items */
+.neiki-gallery > a.neiki-filter-hidden,
+.neiki-gallery > .neiki-item.neiki-filter-hidden {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   11. Responsive Columns
    -------------------------------------------------------------------------- */
 
 @media (max-width: 1200px) {
   .neiki-gallery--masonry { column-count: 3; }
   .neiki-gallery--grid { grid-template-columns: repeat(3, 1fr); }
+  .neiki-gallery--mosaic { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 900px) {
   .neiki-gallery--masonry { column-count: 2; }
   .neiki-gallery--grid { grid-template-columns: repeat(2, 1fr); }
+  .neiki-gallery--mosaic { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 160px; }
   .neiki-gallery { --neiki-gap: 10px; }
+  .neiki-gallery--filmstrip > a,
+  .neiki-gallery--filmstrip > .neiki-item { width: 220px; height: 300px; }
 }
 
 @media (max-width: 600px) {
   .neiki-gallery--masonry { column-count: 2; }
   .neiki-gallery--grid { grid-template-columns: repeat(2, 1fr); }
-  .neiki-gallery { --neiki-gap: 8px; }
+  .neiki-gallery--mosaic { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 140px; }
+  .neiki-gallery { --neiki-gap: 8px; --neiki-border-radius: 10px; }
+  .neiki-gallery--filmstrip > a,
+  .neiki-gallery--filmstrip > .neiki-item { width: 180px; height: 240px; }
 }
 
 @media (max-width: 400px) {
   .neiki-gallery--masonry { column-count: 1; }
   .neiki-gallery--grid { grid-template-columns: 1fr; }
+  .neiki-gallery--mosaic { grid-template-columns: 1fr; grid-auto-rows: 200px; }
+  .neiki-gallery--mosaic > a[data-size="large"],
+  .neiki-gallery--mosaic > .neiki-item[data-size="large"],
+  .neiki-gallery--mosaic > a[data-size="wide"],
+  .neiki-gallery--mosaic > .neiki-item[data-size="wide"] { grid-column: span 1; }
   .neiki-gallery { --neiki-gap: 8px; }
+  .neiki-gallery--filmstrip > a,
+  .neiki-gallery--filmstrip > .neiki-item { width: 160px; height: 220px; }
 }
 
 /* --------------------------------------------------------------------------
-   6. Lightbox Overlay
+   12. Lightbox Overlay (Glassmorphism)
    -------------------------------------------------------------------------- */
 
 .neiki-lightbox {
@@ -222,24 +491,27 @@
   align-items: center;
   justify-content: center;
   background: var(--neiki-overlay-bg);
+  -webkit-backdrop-filter: var(--neiki-overlay-backdrop);
+  backdrop-filter: var(--neiki-overlay-backdrop);
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--neiki-transition-duration) var(--neiki-transition-easing),
-              visibility 0s linear var(--neiki-transition-duration);
+  transition: opacity 0.35s var(--neiki-transition-easing),
+              visibility 0s linear 0.35s;
   -webkit-user-select: none;
   user-select: none;
   outline: none;
+  font-family: var(--neiki-font);
 }
 
 .neiki-lightbox.neiki-lightbox--visible {
   opacity: 1;
   visibility: visible;
-  transition: opacity var(--neiki-transition-duration) var(--neiki-transition-easing),
+  transition: opacity 0.35s var(--neiki-transition-easing),
               visibility 0s linear 0s;
 }
 
 /* --------------------------------------------------------------------------
-   7. Lightbox Image Container
+   13. Lightbox Image Container
    -------------------------------------------------------------------------- */
 
 .neiki-lightbox__stage {
@@ -286,7 +558,7 @@
   width: auto;
   height: auto;
   object-fit: contain;
-  border-radius: var(--neiki-border-radius, 6px);
+  border-radius: var(--neiki-border-radius, 14px);
   cursor: zoom-in;
   transition: transform 0.35s var(--neiki-transition-easing),
               opacity var(--neiki-transition-duration) var(--neiki-transition-easing);
@@ -299,8 +571,19 @@
   cursor: zoom-out;
 }
 
+/* Contextual zoom (panned) — overrides scale zoom */
+.neiki-lightbox__image.neiki-zoom-pan {
+  cursor: grab;
+  transform-origin: var(--neiki-zoom-x, center) var(--neiki-zoom-y, center);
+  transform: scale(var(--neiki-zoom-scale, 2));
+}
+
+.neiki-lightbox__image.neiki-zoom-pan:active {
+  cursor: grabbing;
+}
+
 /* --------------------------------------------------------------------------
-   8. Lightbox Controls (Nav, Close, Fullscreen)
+   14. Lightbox Controls (Glassmorphism Buttons)
    -------------------------------------------------------------------------- */
 
 .neiki-lightbox__btn {
@@ -311,13 +594,16 @@
   justify-content: center;
   width: var(--neiki-btn-size);
   height: var(--neiki-btn-size);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--neiki-btn-border-radius);
   background: var(--neiki-btn-bg);
+  -webkit-backdrop-filter: var(--neiki-btn-backdrop);
+  backdrop-filter: var(--neiki-btn-backdrop);
   color: var(--neiki-btn-color);
   cursor: pointer;
-  transition: background var(--neiki-transition-duration) var(--neiki-transition-easing),
-              transform 0.15s ease;
+  transition: background 0.2s var(--neiki-transition-easing),
+              transform 0.15s ease,
+              border-color 0.2s ease;
   padding: 0;
   line-height: 1;
   font-family: inherit;
@@ -328,6 +614,7 @@
 
 .neiki-lightbox__btn:hover {
   background: var(--neiki-btn-bg-hover);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .neiki-lightbox__btn:active {
@@ -335,22 +622,75 @@
 }
 
 .neiki-lightbox__btn:focus-visible {
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
 }
 
-/* Close */
-.neiki-lightbox__close {
+/* SVG icons inside buttons */
+.neiki-lightbox__btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --------------------------------------------------------------------------
+   15. Lightbox Floating Toolbar
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox__toolbar {
+  position: absolute;
   top: 16px;
   right: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
 }
 
-/* Fullscreen */
-.neiki-lightbox__fullscreen {
-  top: 16px;
-  right: 76px;
+.neiki-lightbox__toolbar .neiki-lightbox__btn {
+  position: relative;
+  top: auto;
+  right: auto;
+  left: auto;
+  bottom: auto;
+  border: none;
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
 }
 
-/* Prev / Next */
+.neiki-lightbox__toolbar .neiki-lightbox__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.neiki-lightbox__toolbar .neiki-lightbox__btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Light theme toolbar overrides */
+[data-theme="light"] .neiki-lightbox__toolbar {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .neiki-lightbox__toolbar .neiki-lightbox__btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* Prev / Next — kept outside toolbar */
 .neiki-lightbox__prev {
   left: 16px;
   top: 50%;
@@ -371,19 +711,8 @@
   transform: translateY(-50%) scale(0.92);
 }
 
-/* SVG icons inside buttons */
-.neiki-lightbox__btn svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 /* --------------------------------------------------------------------------
-   9. Lightbox Top Bar (Counter)
+   16. Lightbox Pill Counter
    -------------------------------------------------------------------------- */
 
 .neiki-lightbox__topbar {
@@ -393,36 +722,49 @@
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .neiki-lightbox__counter {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: rgba(0, 0, 0, 0.3);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
   color: var(--neiki-counter-color);
   font-size: var(--neiki-counter-font-size);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--neiki-font);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
+[data-theme="light"] .neiki-lightbox__counter {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
 /* --------------------------------------------------------------------------
-   10. Lightbox Caption
+   17. Lightbox Caption — Bottom Sheet on Mobile
    -------------------------------------------------------------------------- */
 
 .neiki-lightbox__caption {
   flex: 0 0 auto;
   width: 100%;
   text-align: center;
-  padding: 10px 60px;
+  padding: 10px 80px;
   color: var(--neiki-caption-color);
   font-size: var(--neiki-caption-font-size);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--neiki-font);
   line-height: 1.5;
   min-height: 1.5em;
   transition: opacity var(--neiki-transition-duration) var(--neiki-transition-easing);
 }
 
 /* --------------------------------------------------------------------------
-   11. Thumbnail Strip
+   18. Thumbnail Strip
    -------------------------------------------------------------------------- */
 
 .neiki-lightbox__thumbs {
@@ -435,16 +777,11 @@
   padding: 8px 16px 12px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
+  scrollbar-width: none;
 }
 
 .neiki-lightbox__thumbs::-webkit-scrollbar {
-  height: 4px;
-}
-
-.neiki-lightbox__thumbs::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
+  display: none;
 }
 
 .neiki-lightbox__thumb {
@@ -456,8 +793,9 @@
   cursor: pointer;
   opacity: var(--neiki-thumb-opacity);
   border: 2px solid transparent;
-  transition: opacity var(--neiki-transition-duration) var(--neiki-transition-easing),
-              border-color var(--neiki-transition-duration) var(--neiki-transition-easing);
+  transition: opacity 0.2s var(--neiki-transition-easing),
+              border-color 0.2s var(--neiki-transition-easing),
+              transform 0.2s var(--neiki-transition-easing);
   background: rgba(128, 128, 128, 0.15);
   padding: 0;
   -webkit-appearance: none;
@@ -467,15 +805,17 @@
 
 .neiki-lightbox__thumb:hover {
   opacity: 0.8;
+  transform: scale(1.08);
 }
 
 .neiki-lightbox__thumb.neiki-thumb--active {
   opacity: var(--neiki-thumb-active-opacity);
   border: var(--neiki-thumb-active-border);
+  transform: scale(1.08);
 }
 
 .neiki-lightbox__thumb:focus-visible {
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
 }
 
 .neiki-lightbox__thumb img {
@@ -486,7 +826,226 @@
 }
 
 /* --------------------------------------------------------------------------
-   12. Loading Spinner
+   19. Slideshow / Autoplay Progress Bar
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox__progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--neiki-accent);
+  border-radius: 0 3px 3px 0;
+  width: 0%;
+  z-index: 15;
+  transition: none;
+}
+
+.neiki-lightbox__progress.neiki-progress--running {
+  transition: width linear;
+}
+
+.neiki-lightbox__progress.neiki-progress--paused {
+  /* Keeps current width, no transition */
+}
+
+/* --------------------------------------------------------------------------
+   20. Comparison Slider
+   -------------------------------------------------------------------------- */
+
+.neiki-compare {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--neiki-border-radius, 14px);
+  cursor: col-resize;
+  -webkit-user-select: none;
+  user-select: none;
+  font-family: var(--neiki-font);
+}
+
+.neiki-compare__before,
+.neiki-compare__after {
+  display: block;
+  width: 100%;
+  height: auto;
+  -webkit-user-drag: none;
+}
+
+.neiki-compare__after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  object-fit: cover;
+  clip-path: inset(0 0 0 50%);
+}
+
+.neiki-compare__handle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 4px;
+  height: 100%;
+  background: #fff;
+  transform: translateX(-50%);
+  z-index: 5;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+}
+
+.neiki-compare__handle::before,
+.neiki-compare__handle::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.neiki-compare__handle::before {
+  top: 50%;
+  margin-top: -16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 18 9 12 15 6'/%3E%3C/svg%3E");
+  background-size: 16px;
+  background-repeat: no-repeat;
+  background-position: 6px center;
+}
+
+.neiki-compare__handle::after {
+  display: none;
+}
+
+.neiki-compare__label {
+  position: absolute;
+  bottom: 12px;
+  padding: 4px 12px;
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.neiki-compare__label--before {
+  left: 12px;
+}
+
+.neiki-compare__label--after {
+  right: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   21. Share Popup
+   -------------------------------------------------------------------------- */
+
+.neiki-share {
+  position: absolute;
+  bottom: 60px;
+  right: 16px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  backdrop-filter: blur(20px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  font-family: var(--neiki-font);
+  opacity: 0;
+  transform: translateY(8px);
+  visibility: hidden;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+}
+
+.neiki-share.neiki-share--visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0s;
+}
+
+.neiki-share__btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+.neiki-share__btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.neiki-share__btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+[data-theme="light"] .neiki-share {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .neiki-share__btn {
+  color: #1a1a1a;
+}
+
+[data-theme="light"] .neiki-share__btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Toast notification */
+.neiki-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 13px;
+  font-family: var(--neiki-font);
+  z-index: 9999999;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+.neiki-toast.neiki-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* --------------------------------------------------------------------------
+   22. Loading Spinner
    -------------------------------------------------------------------------- */
 
 .neiki-lightbox__spinner {
@@ -496,7 +1055,7 @@
   transform: translate(-50%, -50%);
   width: var(--neiki-spinner-size);
   height: var(--neiki-spinner-size);
-  border: var(--neiki-spinner-width) solid rgba(128, 128, 128, 0.25);
+  border: var(--neiki-spinner-width) solid rgba(128, 128, 128, 0.2);
   border-top-color: var(--neiki-spinner-color);
   border-radius: 50%;
   animation: neiki-spin 0.7s linear infinite;
@@ -508,18 +1067,17 @@
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* Hide spinner when image loaded */
 .neiki-lightbox__spinner.neiki-hidden {
   display: none;
 }
 
 /* --------------------------------------------------------------------------
-   13. Lazy-load placeholder (shimmer)
+   23. Lazy-load Placeholder (Shimmer)
    -------------------------------------------------------------------------- */
 
 .neiki-gallery > a,
 .neiki-gallery > .neiki-item {
-  background: linear-gradient(110deg, #e0e0e0 8%, #f0f0f0 18%, #e0e0e0 33%);
+  background: linear-gradient(110deg, #e8e8e8 8%, #f5f5f5 18%, #e8e8e8 33%);
   background-size: 200% 100%;
   animation: neiki-shimmer 1.4s linear infinite;
 }
@@ -528,7 +1086,7 @@
 [data-theme="dark"] .neiki-gallery > .neiki-item,
 .neiki-gallery[data-theme="dark"] > a,
 .neiki-gallery[data-theme="dark"] > .neiki-item {
-  background: linear-gradient(110deg, #2a2a2a 8%, #333 18%, #2a2a2a 33%);
+  background: linear-gradient(110deg, #1e1e22 8%, #2a2a30 18%, #1e1e22 33%);
   background-size: 200% 100%;
 }
 
@@ -537,46 +1095,45 @@
 }
 
 /* --------------------------------------------------------------------------
-   14. Accessibility — Focus & Reduced Motion
+   24. Accessibility — Focus & Reduced Motion
    -------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-  .neiki-lightbox,
-  .neiki-lightbox__image,
-  .neiki-lightbox__slide-wrapper,
-  .neiki-gallery--masonry > a > img,
-  .neiki-gallery--grid > a > img {
+  *,
+  *::before,
+  *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
 /* --------------------------------------------------------------------------
-   15. Mobile adjustments
+   25. Mobile Adjustments
    -------------------------------------------------------------------------- */
 
 @media (max-width: 768px) {
   .neiki-lightbox {
     --neiki-lightbox-max-width: 94vw;
     --neiki-lightbox-max-height: 75vh;
-    --neiki-btn-size: 42px;
+    --neiki-btn-size: 40px;
     --neiki-zoom-scale: 1.8;
   }
 
   .neiki-lightbox__prev,
   .neiki-lightbox__next {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
   }
 
   .neiki-lightbox__btn svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 
   .neiki-lightbox__caption {
     padding: 8px 20px;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .neiki-lightbox__thumbs {
@@ -584,8 +1141,37 @@
   }
 
   .neiki-lightbox__thumb {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .neiki-lightbox__toolbar {
+    top: 10px;
+    right: 10px;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 14px;
+  }
+
+  .neiki-lightbox__toolbar .neiki-lightbox__btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Caption as bottom sheet */
+  .neiki-lightbox__caption {
+    position: relative;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.2);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-radius: 16px 16px 0 0;
+    text-align: left;
+    font-size: 13px;
+  }
+
+  [data-theme="light"] .neiki-lightbox__caption {
+    background: rgba(255, 255, 255, 0.4);
   }
 }
 
@@ -593,14 +1179,14 @@
   .neiki-lightbox {
     --neiki-lightbox-max-width: 96vw;
     --neiki-lightbox-max-height: 70vh;
-    --neiki-btn-size: 38px;
+    --neiki-btn-size: 36px;
     --neiki-zoom-scale: 1.6;
   }
 
   .neiki-lightbox__prev,
   .neiki-lightbox__next {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
   }
 
   .neiki-lightbox__prev {
@@ -611,24 +1197,14 @@
     right: 6px;
   }
 
-  .neiki-lightbox__close {
-    top: 10px;
-    right: 10px;
-  }
-
-  .neiki-lightbox__fullscreen {
-    top: 10px;
-    right: 56px;
-  }
-
   .neiki-lightbox__topbar {
     top: 10px;
     left: 10px;
   }
 
   .neiki-lightbox__caption {
-    padding: 6px 14px;
-    font-size: 13px;
+    padding: 8px 14px;
+    font-size: 12px;
   }
 
   .neiki-lightbox__thumbs {
@@ -636,8 +1212,13 @@
   }
 
   .neiki-lightbox__thumb {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .neiki-share {
+    bottom: 50px;
+    right: 10px;
   }
 }
 
@@ -645,31 +1226,41 @@
   .neiki-lightbox {
     --neiki-lightbox-max-width: 98vw;
     --neiki-lightbox-max-height: 65vh;
-    --neiki-btn-size: 34px;
+    --neiki-btn-size: 32px;
   }
 
   .neiki-lightbox__prev,
   .neiki-lightbox__next {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
   }
 
   .neiki-lightbox__btn svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .neiki-lightbox__caption {
-    padding: 4px 10px;
-    font-size: 12px;
+    padding: 6px 10px;
+    font-size: 11px;
   }
 
   .neiki-lightbox__thumb {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
   }
 
   .neiki-lightbox__counter {
     font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .neiki-filter-bar {
+    gap: 6px;
+  }
+
+  .neiki-filter-btn {
+    padding: 4px 12px;
+    font-size: 12px;
   }
 }
