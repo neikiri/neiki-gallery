@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/css-%23663399.svg?style=for-the-badge&logo=css&logoColor=white" alt="CSS">
   <br>
   <img src="https://img.shields.io/badge/License-MIT-2563EB?style=for-the-badge&logo=open-source-initiative&logoColor=white&labelColor=000F15&logoWidth=20" alt="License">
-  <img src="https://img.shields.io/badge/Version-2.1.0-2563EB?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=000F15&logoWidth=20" alt="Version">
+  <img src="https://img.shields.io/badge/Version-3.0.0-2563EB?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=000F15&logoWidth=20" alt="Version">
 </p>
 
 <p align="center">
@@ -55,7 +55,7 @@
 - **Multiple instances** — independent galleries on one page
 - **Dark & light themes** — CSS custom properties + accent color system (`--neiki-accent`)
 - **Accessibility** — ARIA attributes, focus management, `prefers-reduced-motion`
-- **Event system** — `open`, `close`, `change`, `filter`, `select`, `slideshowStart`, `slideshowStop`
+- **Event system** — `open`, `close`, `change`, `filter`, `select`, `slideshowStart`, `slideshowStop`, `favorite`, `unfavorite`, `infoOpen`, `infoClose`, `print`, `editorOpen`, `editorExport`, `annotateOpen`, `annotateExport`, `append`, `remove`
 - **Blurhash placeholders** — `data-blurhash` attribute decoded into blurred preview (replaces shimmer)
 - **Story mode** — Instagram-like vertical fullscreen viewer with progress bars and tap navigation
 - **Picture-in-Picture** — minimize lightbox to a resizable corner window
@@ -68,7 +68,21 @@
 - **Drag & drop reorder** — HTML5 drag to reorder grid items
 - **Aspect-ratio skeleton** — `data-width`/`data-height` for placeholder sizing
 - **Web Share API** — native mobile sharing with clipboard fallback
-- **Cross-browser** — Chrome 60+, Firefox 55+, Safari 12+, Edge 79+
+- **Video & embeds** — auto-detect MP4/WebM/Ogg/MOV/M4V, YouTube and Vimeo URLs in lightbox
+- **Plugin system** — `NeikiGallery.registerPlugin()` with `init`/`open`/`change`/`close`/`destroy` lifecycle hooks
+- **Album groups** — `data-group="album"` links galleries; navigation traverses across all
+- **Favorites** — heart button + localStorage persistence + `B` key shortcut
+- **Info panel** — slide-out sidebar with metadata, EXIF, source URL (`I` key)
+- **Image editor** — rotate / flip / export to PNG via `<canvas>`
+- **Annotation layer** — freehand drawing with color picker, brush size, undo, clear, export
+- **Print** — print current image with caption (`P` key)
+- **Right-click context menu** — open original, copy link, download, share, print, favorite
+- **Infinite scroll** — `loadMore` callback + `append()` / `remove()` API
+- **Keyboard shortcuts overlay** — press `?` to view all shortcuts
+- **System theme detection** — `theme: 'system'` follows OS `prefers-color-scheme`
+- **Kenburns slideshow** — slow zoom-and-pan animation per slide
+- **Configurable counter** — `counterFormat` with `{current}`/`{total}`/`{percent}` tokens
+- **Cross-browser** — Chrome 80+, Firefox 75+, Safari 14+, Edge 80+
 
 ## 🚀 Quick Start
 
@@ -103,7 +117,7 @@ That's it — galleries with `data-neiki-gallery` auto-initialize on page load.
 
 > **Pin a specific version** to avoid unexpected changes:
 > ```
-> https://cdn.neiki.eu/neiki-gallery/2.1.0/neiki-gallery.min.js
+> https://cdn.neiki.eu/neiki-gallery/3.0.0/neiki-gallery.min.js
 > ```
 
 ### Self-Hosting (Local)
@@ -147,26 +161,45 @@ const gallery = new NeikiGallery('#my-gallery', {
   contextualZoom: false,   // zoom to click point
   fullscreen: true,
   transition: 'fade',      // 'fade' | 'slide'
-  theme: 'dark',           // 'dark' | 'light'
+  theme: 'system',         // 'dark' | 'light' | 'system' (auto-detect)  ← v3 default
   hashNavigation: true,
-  stagger: true,           // entrance animation
-  slideshow: false,        // auto-start slideshow on open
-  slideshowInterval: 4000, // ms between slides
-  share: true,             // share/download popup
-  filter: false,           // tag filtering
-  batchSelect: false,      // Shift+click multi-select
+  counter: true,
+  counterFormat: '{current} / {total}',  // v3 — tokens: {current}, {total}, {percent}
+  stagger: true,
+  slideshow: {             // v3 — nested config (boolean still works)
+    interval: 4000,
+    pauseOnHover: true,
+    kenburns: false,
+    direction: 'forward'   // or 'reverse'
+  },
+  share: true,
+  filter: false,
+  batchSelect: false,
   // v2.1.0
-  focusPoint: true,        // respect data-focus for object-position
-  blurhash: true,          // decode data-blurhash placeholders
-  exif: false,             // show EXIF overlay in lightbox
-  storyMode: false,        // vertical fullscreen story viewer
-  pip: false,              // picture-in-picture lightbox
-  virtualScroll: false,    // virtualize grid for large galleries
-  dragReorder: false,      // drag-and-drop reorder
-  backdropTint: false,     // tint overlay with dominant color
-  morphTransition: false,  // FLIP morph from grid to lightbox
-  colorPalette: false,     // extract dominant colors
-  aspectSkeleton: true,    // data-width/data-height skeleton
+  focusPoint: true,
+  blurhash: true,
+  exif: false,
+  storyMode: false,
+  pip: false,
+  virtualScroll: false,
+  dragReorder: false,
+  backdropTint: false,
+  morphTransition: false,
+  colorPalette: false,
+  aspectSkeleton: true,
+  // v3.0.0
+  video: true,             // detect MP4 / YouTube / Vimeo
+  plugins: ['watermark', { name: 'analytics', trackingId: 'X' }],
+  group: '',               // album group name (or use data-group)
+  favorites: false,        // ❤️ button + localStorage
+  favoritesKey: '',        // custom localStorage key suffix
+  infoPanel: false,        // sidebar with metadata (I key)
+  contextMenu: false,      // right-click menu on items
+  shortcutsHelp: true,     // overlay on '?' key
+  infiniteScroll: false,   // auto-load more
+  loadMore: null,          // function(currentLength) → array | Promise<array>
+  editor: false,           // crop/rotate/flip toolbar
+  annotate: false          // freehand drawing layer
 });
 ```
 
@@ -177,15 +210,50 @@ const gallery = new NeikiGallery('#my-gallery', {
 ```js
 gallery.open(index);          // Open lightbox at image index
 gallery.close();              // Close lightbox
-gallery.next();               // Go to next image
-gallery.prev();               // Go to previous image
+gallery.next();               // Go to next image (group-aware)
+gallery.prev();               // Go to previous image (group-aware)
 gallery.startSlideshow();     // Start autoplay
 gallery.stopSlideshow();      // Stop autoplay
+gallery.pauseSlideshow();     // v3 — pause without emitting stop
 gallery.toggleSlideshow();    // Toggle autoplay
 gallery.filter('landscape');  // Filter by tag (null = show all)
 gallery.getSelected();        // Get batch-selected items
 gallery.clearSelection();     // Clear batch selection
 gallery.getOrder();           // Get current item order (after drag reorder)
+
+// v3.0.0 — Favorites
+gallery.toggleFavorite();     // Toggle favorite for current image
+gallery.isFavorite(index);    // Check if image is favorited
+gallery.getFavorites();       // Get array of favorited image src URLs
+gallery.clearFavorites();     // Remove all favorites
+
+// v3.0.0 — Info panel / overlays
+gallery.toggleInfoPanel(force);     // Toggle info sidebar (force = bool)
+gallery.toggleShortcutsHelp(force); // Toggle keyboard shortcuts overlay
+
+// v3.0.0 — Editor & annotation
+gallery.openEditor();         // Open crop/rotate/flip editor
+gallery.closeEditor();
+gallery.getEditedBlob();      // Last exported edited image as Blob
+
+gallery.openAnnotate();       // Open drawing layer
+gallery.closeAnnotate();
+gallery.getAnnotatedBlob();
+
+// v3.0.0 — Print & dynamic content
+gallery.print(index);         // Print current or specified image
+gallery.append([{src,...}]);  // Append new items at runtime
+gallery.remove(index);        // Remove item by index
+
+// v3.0.0 — Plugin access
+gallery.plugin('watermark');  // Get plugin instance by name
+
+// v3.0.0 — Event helpers
+gallery.on('change', fn);
+gallery.off('change', fn);    // Remove specific listener
+gallery.off('change');        // Remove all listeners for event
+gallery.once('open', fn);     // Auto-removed after first fire
+
 gallery.destroy();            // Remove gallery, clean up all listeners & DOM
 ```
 
@@ -221,7 +289,56 @@ NeikiGallery.parseExif('photo.jpg', (tags) => {
 
 // Blurhash decoding (v2.1.0)
 const pixels = NeikiGallery.decodeBlurhash('LEHV6nWB2y...', 32, 32);
+
+// Media type detection (v3.0.0)
+NeikiGallery.detectMediaType('https://youtube.com/watch?v=abc'); // 'youtube'
+NeikiGallery.detectMediaType('clip.mp4');                        // 'video'
+NeikiGallery.detectMediaType('photo.jpg');                       // 'image'
+
+// Plugin registration (v3.0.0)
+NeikiGallery.registerPlugin('watermark', (gallery, options) => ({
+  init()   { /* set up DOM, listeners */ },
+  open()   { /* on lightbox open */ },
+  change(d){ /* on slide change, d = {index, item, prevIndex} */ },
+  close()  { /* on lightbox close */ },
+  destroy(){ /* cleanup */ }
+}));
+
+NeikiGallery.unregisterPlugin('watermark');
+NeikiGallery.getRegisteredPlugins();   // ['watermark', ...]
+
+// Version
+console.log(NeikiGallery.version);     // '3.0.0'
 ```
+
+### Plugin System
+
+A plugin is a factory function that receives the gallery instance and an options
+object, and returns an object with optional lifecycle methods:
+
+```js
+NeikiGallery.registerPlugin('analytics', (gallery, opts) => ({
+  init() {
+    console.log('[analytics] gallery initialized');
+  },
+  open(data) {
+    track('lightbox_open', { index: data.index });
+  },
+  change(data) {
+    track('slide_view', { src: data.item.src, index: data.index });
+  },
+  close() {
+    track('lightbox_close');
+  },
+  destroy() {
+    console.log('[analytics] cleanup');
+  }
+}));
+
+new NeikiGallery('#g', { plugins: [{ name: 'analytics', sampleRate: 0.5 }] });
+```
+
+You can access plugin instances on a gallery via `gallery.plugin('analytics')`.
 
 ### Events
 
@@ -256,6 +373,16 @@ gallery.on('reorder', (order) => {
 
 gallery.on('pipEnter', () => console.log('PiP on'));
 gallery.on('storyEnter', () => console.log('Story opened'));
+
+// v3.0.0 events
+gallery.on('favorite', ({ index, src }) => console.log('★ favorited', src));
+gallery.on('unfavorite', ({ index, src }) => console.log('☆ removed'));
+gallery.on('infoOpen', () => console.log('info panel opened'));
+gallery.on('print', ({ index, src }) => console.log('printed', src));
+gallery.on('editorExport', ({ blob, url }) => console.log('edited blob', url));
+gallery.on('annotateExport', ({ blob, url }) => console.log('annotated', url));
+gallery.on('append', (items) => console.log('appended', items.length));
+gallery.on('remove', ({ index }) => console.log('removed item', index));
 ```
 
 ### Options
@@ -269,15 +396,15 @@ gallery.on('storyEnter', () => console.log('Story opened'));
 | `contextualZoom` | `boolean` | `false` | Zoom to cursor point instead of center |
 | `fullscreen` | `boolean` | `true` | Show fullscreen button |
 | `transition` | `string` | `'fade'` | `'fade'` or `'slide'` |
-| `theme` | `string` | `'dark'` | `'dark'` or `'light'` |
+| `theme` | `string` | `'system'` | `'dark'` · `'light'` · `'system'` (auto-detect) |
 | `hashNavigation` | `boolean` | `true` | URL hash deep linking |
 | `counter` | `boolean` | `true` | Show image counter |
+| `counterFormat` | `string` | `'{current} / {total}'` | Counter format with `{current}`, `{total}`, `{percent}` tokens |
 | `captions` | `boolean` | `true` | Show image captions |
 | `preload` | `number` | `1` | Adjacent images to preload |
 | `lazyLoad` | `boolean` | `true` | Lazy load grid thumbnails |
 | `stagger` | `boolean` | `true` | Staggered entrance animation |
-| `slideshow` | `boolean` | `false` | Auto-start slideshow on open |
-| `slideshowInterval` | `number` | `4000` | Slideshow interval in ms |
+| `slideshow` | `boolean \| object` | `false` | `true` or `{ interval, pauseOnHover, kenburns, direction }` |
 | `share` | `boolean` | `true` | Show share button in lightbox |
 | `filter` | `boolean` | `false` | Enable tag filtering bar |
 | `batchSelect` | `boolean` | `false` | Enable Shift+click multi-select |
@@ -292,6 +419,18 @@ gallery.on('storyEnter', () => console.log('Story opened'));
 | `morphTransition` | `boolean` | `false` | FLIP morph from grid to lightbox |
 | `colorPalette` | `boolean` | `false` | Show extracted color palette |
 | `aspectSkeleton` | `boolean` | `true` | Use `data-width`/`data-height` for skeleton |
+| `video` | `boolean` | `true` | Auto-detect MP4 / YouTube / Vimeo URLs |
+| `plugins` | `array` | `null` | Plugins to instantiate; e.g. `['name', { name, ...opts }]` |
+| `group` | `string` | `''` | Album group name (also via `data-group`) |
+| `favorites` | `boolean` | `false` | Heart button + localStorage |
+| `favoritesKey` | `string` | `''` | Custom suffix for localStorage key |
+| `infoPanel` | `boolean` | `false` | Slide-out metadata sidebar |
+| `contextMenu` | `boolean` | `false` | Right-click menu on items |
+| `shortcutsHelp` | `boolean` | `true` | `?` key shortcuts overlay |
+| `infiniteScroll` | `boolean` | `false` | Auto-load more on scroll (with `loadMore`) |
+| `loadMore` | `function` | `null` | `(currentLength) => array \| Promise<array>` |
+| `editor` | `boolean` | `false` | Crop/rotate/flip toolbar |
+| `annotate` | `boolean` | `false` | Freehand drawing layer |
 
 ### Data Attributes
 
@@ -306,6 +445,9 @@ All options can also be set via `data-` attributes on the container:
      data-stagger="true"
      data-slideshow="false"
      data-slideshow-interval="5000"
+     data-slideshow-pause-on-hover="true"
+     data-slideshow-kenburns="true"
+     data-counter-format="{current} of {total}"
      data-share="true"
      data-filter="true"
      data-batch-select="false"
@@ -318,8 +460,16 @@ All options can also be set via `data-` attributes on the container:
      data-color-palette="false"
      data-drag-reorder="false"
      data-virtual-scroll="false"
-     data-aspect-skeleton="true">
-  <a href="full.jpg" data-tags="landscape,nature" data-size="large" data-width="1200" data-height="800">
+     data-aspect-skeleton="true"
+     data-group="vacation"
+     data-favorites="true"
+     data-info-panel="true"
+     data-context-menu="true"
+     data-shortcuts-help="true"
+     data-editor="true"
+     data-annotate="true"
+     data-video="true">
+  <a href="full.jpg" data-tags="landscape,nature" data-size="large" data-width="1200" data-height="800" data-poster="poster.jpg" data-type="image">
     <img src="thumb.jpg" alt="Photo" data-focus="0.5 0.3" data-blurhash="LEHV6nWB2y...">
   </a>
 </div>
@@ -357,10 +507,59 @@ Switch themes at runtime by setting `data-theme="light"` or `data-theme="dark"` 
 
 | Browser | Version |
 |---------|---------|
-| Chrome | 60+ |
-| Firefox | 55+ |
-| Safari | 12+ |
-| Edge | 79+ |
+| Chrome | 80+ |
+| Firefox | 75+ |
+| Safari | 14+ |
+| Edge | 80+ |
+
+> **v3.0.0** raised the minimum to take advantage of `aspect-ratio`, `backdrop-filter`,
+> stable `IntersectionObserver`, and modern Canvas/Blob APIs. If you need older
+> browser support, pin to v2.1.0.
+
+## 🔁 Migration from v2.x to v3.0.0
+
+**v3.0.0 contains breaking changes.** Most galleries will continue to work, but
+review the following:
+
+### Slideshow config is nested
+
+```js
+// v2.x
+new NeikiGallery('#g', { slideshow: true, slideshowInterval: 5000 });
+
+// v3.0.0 — preferred (fine-grained control)
+new NeikiGallery('#g', {
+  slideshow: { interval: 5000, pauseOnHover: true, kenburns: true }
+});
+
+// v3.0.0 — still works (uses defaults)
+new NeikiGallery('#g', { slideshow: true });
+```
+
+### Default theme is `'system'`
+
+If you relied on the old default `'dark'`, set it explicitly:
+
+```js
+new NeikiGallery('#g', { theme: 'dark' });
+```
+
+### Hash format changed
+
+Old: `#neiki-1=3` → New: `#gallery-id-or-group-name/3`
+
+If you have external links to the old format, update them or set
+`hashNavigation: false` and implement custom routing.
+
+### Counter format
+
+Default output (`"3 / 12"`) is unchanged, but it's now formatted via
+`counterFormat: '{current} / {total}'`. Override with custom tokens.
+
+### Browser support
+
+Minimum Chrome 80+ / Firefox 75+ / Safari 14+ / Edge 80+. If you need older
+browser support, stay on v2.1.0.
 
 ## 📄 License
 

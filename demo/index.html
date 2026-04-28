@@ -278,6 +278,17 @@
       <span class="tag">FLIP Morph</span>
       <span class="tag">Virtual Scroll</span>
       <span class="tag">Web Share API</span>
+      <span class="tag">Video / YouTube / Vimeo</span>
+      <span class="tag">Plugin System</span>
+      <span class="tag">Album Groups</span>
+      <span class="tag">Favorites</span>
+      <span class="tag">Info Panel</span>
+      <span class="tag">Image Editor</span>
+      <span class="tag">Annotation</span>
+      <span class="tag">Print</span>
+      <span class="tag">Context Menu</span>
+      <span class="tag">Infinite Scroll</span>
+      <span class="tag">Kenburns</span>
       <span class="tag">0 Dependencies</span>
     </div>
   </header>
@@ -532,17 +543,164 @@
   </div>
 
   <!-- ================================================================
+       9. Video & YouTube/Vimeo (v3.0.0)
+       ================================================================ -->
+  <div class="section">
+    <h2>9. Video, YouTube &amp; Vimeo Embeds</h2>
+    <p class="desc">Mix images with MP4 video files and YouTube/Vimeo embeds in a single gallery. Auto-detected from URL.</p>
+
+    <div data-neiki-gallery data-layout="grid" data-theme="dark" data-context-menu="true" id="gallery-video">
+      <a href="https://www.w3schools.com/html/mov_bbb.mp4" data-poster="https://picsum.photos/id/231/400/267" data-caption="HTML5 video clip">
+        <img src="https://picsum.photos/id/231/400/267" alt="Video thumbnail">
+      </a>
+      <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" data-caption="YouTube embed example">
+        <img src="https://picsum.photos/id/232/400/267" alt="YouTube thumbnail">
+      </a>
+      <a href="https://vimeo.com/76979871" data-caption="Vimeo embed example">
+        <img src="https://picsum.photos/id/233/400/267" alt="Vimeo thumbnail">
+      </a>
+      <a href="https://picsum.photos/id/234/1200/800" data-caption="Regular image alongside video">
+        <img src="https://picsum.photos/id/234/400/267" alt="Image">
+      </a>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       10. Favorites + Info Panel + Print (v3.0.0)
+       ================================================================ -->
+  <div class="section">
+    <h2>10. Favorites, Info Panel &amp; Print</h2>
+    <p class="desc">Heart icon to favorite (saved in <code>localStorage</code>), <kbd>I</kbd> for info sidebar, <kbd>B</kbd> to bookmark, <kbd>P</kbd> to print, <kbd>?</kbd> for shortcuts help.</p>
+
+    <div data-neiki-gallery data-layout="grid" data-theme="dark"
+         data-favorites="true" data-info-panel="true" data-shortcuts-help="true"
+         data-print="true" data-context-menu="true" id="gallery-favorites">
+      <a href="https://picsum.photos/id/240/1200/800" data-caption="Aurora over a frozen lake" data-tags="nature,winter" data-width="1200" data-height="800">
+        <img src="https://picsum.photos/id/240/400/267" alt="Aurora">
+      </a>
+      <a href="https://picsum.photos/id/241/1200/800" data-caption="Forest path at dusk" data-tags="nature,forest" data-width="1200" data-height="800">
+        <img src="https://picsum.photos/id/241/400/267" alt="Forest">
+      </a>
+      <a href="https://picsum.photos/id/242/1200/800" data-caption="Coastal cliffs" data-tags="nature,coast" data-width="1200" data-height="800">
+        <img src="https://picsum.photos/id/242/400/267" alt="Cliffs">
+      </a>
+      <a href="https://picsum.photos/id/243/1200/800" data-caption="Sand dunes at sunrise" data-tags="nature,desert" data-width="1200" data-height="800">
+        <img src="https://picsum.photos/id/243/400/267" alt="Dunes">
+      </a>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       11. Image Editor + Annotation (v3.0.0)
+       ================================================================ -->
+  <div class="section">
+    <h2>11. Image Editor &amp; Annotation</h2>
+    <p class="desc">Open lightbox and use the toolbar's edit (✎) button to rotate/flip, or annotate (✍) to draw on the image. Export as PNG.</p>
+
+    <div data-neiki-gallery data-layout="grid" data-theme="dark"
+         data-editor="true" data-annotate="true" id="gallery-editor">
+      <a href="https://picsum.photos/id/250/1200/800" data-caption="Editable photo 1">
+        <img src="https://picsum.photos/id/250/400/267" alt="Photo 1">
+      </a>
+      <a href="https://picsum.photos/id/251/1200/800" data-caption="Editable photo 2">
+        <img src="https://picsum.photos/id/251/400/267" alt="Photo 2">
+      </a>
+      <a href="https://picsum.photos/id/252/1200/800" data-caption="Editable photo 3">
+        <img src="https://picsum.photos/id/252/400/267" alt="Photo 3">
+      </a>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       12. Album Groups (v3.0.0)
+       ================================================================ -->
+  <div class="section">
+    <h2>12. Album Groups — Navigate Across Galleries</h2>
+    <p class="desc">Two galleries below share <code>data-group="vacation"</code>. Open either and use arrows to navigate seamlessly across both. Counter shows total group position.</p>
+
+    <div data-neiki-gallery data-layout="grid" data-theme="dark" data-group="vacation" id="gallery-album-1">
+      <a href="https://picsum.photos/id/260/1200/800" data-caption="Day 1 — Arrival">
+        <img src="https://picsum.photos/id/260/400/267" alt="Day 1">
+      </a>
+      <a href="https://picsum.photos/id/261/1200/800" data-caption="Day 2 — Beach">
+        <img src="https://picsum.photos/id/261/400/267" alt="Day 2">
+      </a>
+      <a href="https://picsum.photos/id/48/1200/800" data-caption="Day 3 — Mountains">
+        <img src="https://picsum.photos/id/48/400/267" alt="Day 3">
+      </a>
+    </div>
+
+    <div data-neiki-gallery data-layout="grid" data-theme="dark" data-group="vacation" id="gallery-album-2" style="margin-top:20px">
+      <a href="https://picsum.photos/id/263/1200/800" data-caption="Day 4 — Local market">
+        <img src="https://picsum.photos/id/263/400/267" alt="Day 4">
+      </a>
+      <a href="https://picsum.photos/id/264/1200/800" data-caption="Day 5 — Sunset">
+        <img src="https://picsum.photos/id/264/400/267" alt="Day 5">
+      </a>
+      <a href="https://picsum.photos/id/265/1200/800" data-caption="Day 6 — Departure">
+        <img src="https://picsum.photos/id/265/400/267" alt="Day 6">
+      </a>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       13. Plugin System Example (v3.0.0)
+       ================================================================ -->
+  <div class="section">
+    <h2>13. Plugin System</h2>
+    <p class="desc">Custom plugins can hook into <code>init</code>, <code>open</code>, <code>change</code>, <code>close</code>, <code>destroy</code>. Example: a watermark plugin registered below adds a corner badge.</p>
+
+    <div id="gallery-plugin">
+      <a href="https://picsum.photos/id/270/1200/800" data-caption="With watermark plugin">
+        <img src="https://picsum.photos/id/270/400/267" alt="">
+      </a>
+      <a href="https://picsum.photos/id/271/1200/800" data-caption="Plugin sees every change">
+        <img src="https://picsum.photos/id/271/400/267" alt="">
+      </a>
+      <a href="https://picsum.photos/id/272/1200/800" data-caption="© Neiki demo">
+        <img src="https://picsum.photos/id/272/400/267" alt="">
+      </a>
+    </div>
+  </div>
+
+  <!-- ================================================================
        Footer
        ================================================================ -->
   <footer class="footer">
-    <p>Neiki Gallery v2.1.0 &middot; Vanilla JS &middot; Zero Dependencies</p>
+    <p>Neiki Gallery v3.0.0 &middot; Vanilla JS &middot; Zero Dependencies</p>
   </footer>
 
   <!-- ================================================================
        Scripts
        ================================================================ -->
-  <script src="https://cdn.neiki.eu/neiki-gallery/neiki-gallery.min.js"></script>
+  <link rel="stylesheet" href="../src/neiki-gallery.css">
+  <script src="../src/neiki-gallery.js"></script>
   <script>
+    // ============================================================
+    // v3.0.0 — Plugin example: watermark
+    // ============================================================
+    NeikiGallery.registerPlugin('watermark', function (gallery, options) {
+      var text = (options && options.text) || '© neiki';
+      var badge = null;
+      return {
+        init: function () {
+          badge = document.createElement('div');
+          badge.textContent = text;
+          badge.style.cssText = 'position:absolute;bottom:14px;right:14px;z-index:50;padding:6px 12px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;border-radius:8px;backdrop-filter:blur(8px);pointer-events:none;font-family:system-ui;';
+          gallery._lightbox.appendChild(badge);
+        },
+        open: function () { if (badge) badge.style.display = 'block'; },
+        close: function () { if (badge) badge.style.display = 'none'; },
+        destroy: function () { if (badge && badge.parentNode) badge.parentNode.removeChild(badge); }
+      };
+    });
+
+    new NeikiGallery('#gallery-plugin', {
+      layout: 'grid',
+      theme: 'dark',
+      plugins: [{ name: 'watermark', text: '© neiki — plugin demo' }]
+    });
+
     // Comparison slider
     NeikiGallery.compare('#compare-demo', {
       before: 'https://picsum.photos/id/100/800/500?grayscale',

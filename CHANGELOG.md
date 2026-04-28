@@ -5,6 +5,71 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.0] — 2026-04-28
+
+> **Major release.** This version introduces breaking changes — see Migration Guide
+> in `README.md` for the upgrade path from v2.x.
+
+### Added
+
+- **Plugin system** — `NeikiGallery.registerPlugin(name, factory)` with lifecycle hooks (`init`, `open`, `change`, `close`, `destroy`); plugins receive the gallery instance and can extend behavior, add toolbar overlays, etc. (`plugins` option)
+- **Video & embed support** — auto-detect MP4 / WebM / Ogg / MOV / M4V video files and YouTube / Vimeo URLs in gallery items; rendered as `<video>` with controls or as iframe in lightbox; videos auto-pause when changing slides (`video` option, `data-poster`, `data-type`)
+- **Album groups** — link multiple galleries with `data-group="album"`; navigation traverses across all gallery items in the same group; counter reflects group totals (`group` option)
+- **Favorites / bookmarks** — heart button in lightbox toolbar with localStorage persistence; thumbnails get a heart badge when favorited; `B` keyboard shortcut; `getFavorites()`, `clearFavorites()`, `isFavorite()`, `toggleFavorite()` API; `favorite` / `unfavorite` events (`favorites` option)
+- **Image info panel** — slide-out sidebar showing filename, dimensions, tags, EXIF, source URL; `I` keyboard shortcut; `toggleInfoPanel()` API (`infoPanel` option)
+- **Print support** — print current image with caption via toolbar entry, `P` keyboard shortcut, or `gallery.print()` API method; emits `print` event
+- **Right-click context menu** — custom menu on gallery items: open original, copy link, download, share, print, favorite (`contextMenu` option)
+- **Keyboard shortcuts overlay** — press `?` to view all shortcuts in a modal; toggle via toolbar button; lists all 10+ shortcuts (`shortcutsHelp` option, on by default)
+- **Infinite scroll / dynamic items** — `loadMore` callback fires when nearing scroll bottom and appends returned items; `gallery.append(items)` and `gallery.remove(index)` methods; `infiniteScroll` option
+- **Image editor** — toolbar with rotate (CW/CCW), flip (horizontal/vertical), reset, and PNG export via Canvas; cross-origin safe; `openEditor()`, `closeEditor()`, `getEditedBlob()` API; emits `editorOpen`, `editorClose`, `editorExport` events (`editor` option)
+- **Annotation / drawing layer** — freehand drawing on images with color picker, brush size slider, undo, clear, and PNG export; `openAnnotate()`, `closeAnnotate()`, `getAnnotatedBlob()` API; emits `annotateOpen`, `annotateClose`, `annotateExport` events (`annotate` option)
+- **Kenburns slideshow effect** — slow zoom-and-pan animation per slide, sync'd to slideshow interval; configurable via `slideshow.kenburns: true`
+- **Slideshow pause-on-hover** — auto-pauses slideshow when cursor enters the lightbox; configurable via `slideshow.pauseOnHover: true`
+- **Slideshow direction** — reverse playback via `slideshow.direction: 'reverse'`
+- **Configurable counter format** — `counterFormat` option supports `{current}`, `{total}`, `{percent}` tokens (e.g. `'Image {current} of {total} ({percent}%)'`)
+- **System theme detection** — `theme: 'system'` (new default) auto-detects `prefers-color-scheme` and follows OS theme changes live
+- **`gallery.once(event, callback)`** — auto-removes listener after first fire
+- **`gallery.off(event)`** — without callback now removes all listeners for that event
+- New keyboard shortcuts: `Z` toggle zoom, `I` info panel, `B` favorite, `P` print, `?` shortcuts help; `Escape` now closes overlays first before lightbox
+- New static utilities: `NeikiGallery.detectMediaType()`, `NeikiGallery.registerPlugin()`, `NeikiGallery.unregisterPlugin()`, `NeikiGallery.getRegisteredPlugins()`, `NeikiGallery.version`
+- New events: `favorite`, `unfavorite`, `infoOpen`, `infoClose`, `print`, `editorOpen`, `editorClose`, `editorExport`, `annotateOpen`, `annotateClose`, `annotateExport`, `append`, `remove`, `pluginRegister`
+- New data attributes: `data-video`, `data-poster`, `data-type`, `data-group`, `data-favorites`, `data-info-panel`, `data-context-menu`, `data-shortcuts-help`, `data-infinite-scroll`, `data-editor`, `data-annotate`, `data-counter-format`, `data-slideshow-pause-on-hover`, `data-slideshow-kenburns`
+- Demo page expanded with 5 new sections (Video/Embed, Favorites+Info+Print, Editor+Annotation, Album Groups, Plugin System)
+
+### Changed
+
+- **BREAKING: Slideshow config is now nested.** `slideshowInterval: 4000` no longer exists. Use `slideshow: { interval: 4000, pauseOnHover: true, kenburns: true, direction: 'forward' }`. The boolean form `slideshow: true` still works and uses default interval (4000 ms).
+- **BREAKING: Default theme is `'system'` instead of `'dark'`.** To restore old behavior, explicitly set `theme: 'dark'`.
+- **BREAKING: Hash format changed** from `#neiki-{numericId}={index}` to `#{containerIdOrGroupName}/{index}` for cleaner URLs that integrate with semantic page anchors.
+- **BREAKING: Minimum supported browser raised** from Chrome 60+ / Firefox 55+ / Safari 12+ to Chrome 80+ / Firefox 75+ / Safari 14+ to take advantage of `aspect-ratio`, `backdrop-filter`, optional chaining tolerance, and modern Intersection/Resize observers.
+- **BREAKING: `data-slideshow-interval` attribute is deprecated** in favor of the nested form (still parsed for backward-compat in v3.0.0, will be removed in v4.0.0).
+- Counter element text is now produced by `_formatCounter(index, total)` honoring `counterFormat`.
+- `_goTo()` factored: shared post-navigation logic moved to `_postGoToCommon()` so non-image media (video/embed) reuse counter, caption, hash, info-panel, fav-UI updates.
+
+### Removed
+
+- **BREAKING: Top-level `slideshowInterval` option** — moved into nested `slideshow.interval`.
+- **BREAKING: Hardcoded counter format** `"3 / 12"` — replaced by `counterFormat` option (default produces same output, but is now overridable).
+
+### Migration Guide (v2.x → v3.0.0)
+
+```js
+// v2.x
+new NeikiGallery('#g', {
+  slideshow: true,
+  slideshowInterval: 5000,
+  theme: 'dark'
+});
+
+// v3.0.0
+new NeikiGallery('#g', {
+  slideshow: { interval: 5000, pauseOnHover: true },
+  theme: 'dark'  // explicit if you don't want system detection
+});
+```
+
+If you depend on the old hash format, set `hashNavigation: false` and implement your own routing.
+
 ## [2.1.0] — 2026-04-28
 
 ### Added

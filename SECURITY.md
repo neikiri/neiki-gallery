@@ -7,6 +7,7 @@
 | 1.0.x   | ✅ Yes    |
 | 2.0.x   | ✅ Yes    |
 | 2.1.x   | ✅ Yes    |
+| 3.0.x   | ✅ Yes    |
 
 Only the latest release is actively supported with security updates.
 

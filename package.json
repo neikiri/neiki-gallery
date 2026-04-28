@@ -1,6 +1,6 @@
 {
   "name": "neiki-gallery",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Vanilla JavaScript image gallery and lightbox — zero dependencies",
   "keywords": [
     "gallery",
@@ -17,7 +17,16 @@
     "zoom",
     "fullscreen",
     "glassmorphism",
-    "filtering"
+    "filtering",
+    "video",
+    "youtube",
+    "vimeo",
+    "plugin-system",
+    "favorites",
+    "image-editor",
+    "annotation",
+    "album",
+    "infinite-scroll"
   ],
   "main": "dist/neiki-gallery.js",
   "exports": {

@@ -1,5 +1,5 @@
 /*!
- * Neiki Gallery v2.1.0
+ * Neiki Gallery v3.0.0
  * A vanilla JavaScript image gallery / lightbox library.
  * No dependencies. No frameworks.
  *
@@ -96,7 +96,13 @@
     pause: '<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>',
     zoom: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
     link: '<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
-    download: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>'
+    download: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    heart: '<svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+    info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+    print: '<svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
+    edit: '<svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
+    draw: '<svg viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>',
+    help: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
   };
 
   /* ========================================================================
@@ -111,15 +117,15 @@
     contextualZoom: false,   // zoom to click point instead of center
     fullscreen: true,
     transition: 'fade',      // 'fade' | 'slide'
-    theme: 'dark',           // 'dark' | 'light'
+    theme: 'system',         // 'dark' | 'light' | 'system' (auto-detect prefers-color-scheme)
     hashNavigation: true,
     counter: true,
+    counterFormat: '{current} / {total}', // tokens: {current}, {total}, {percent}
     captions: true,
     preload: 1,
     lazyLoad: true,
     stagger: true,           // staggered entrance animation
-    slideshow: false,        // auto-advance (can be started via API)
-    slideshowInterval: 4000, // ms between slides
+    slideshow: false,        // boolean OR { interval, pauseOnHover, kenburns, direction }
     share: true,             // show share button in lightbox
     filter: false,           // enable tag filtering (reads data-tags)
     batchSelect: false,      // enable Shift+click multi-select
@@ -134,7 +140,21 @@
     backdropTint: false,     // tint overlay with image dominant color
     morphTransition: false,  // FLIP morph from grid to lightbox
     colorPalette: false,     // extract dominant colors from images
-    aspectSkeleton: true     // use data-width/data-height for skeleton aspect-ratio
+    aspectSkeleton: true,    // use data-width/data-height for skeleton aspect-ratio
+    // v3.0.0 options
+    video: true,             // detect and render video / YouTube / Vimeo
+    plugins: null,           // array: ['pluginName', { name, ...opts }]
+    group: '',               // album group name (also data-group attr)
+    favorites: false,        // ❤️ button + localStorage persistence
+    favoritesKey: '',        // custom localStorage key suffix
+    infoPanel: false,        // sidebar with image metadata
+    contextMenu: false,      // right-click custom menu
+    shortcutsHelp: true,     // show keyboard shortcuts overlay on '?'
+    infiniteScroll: false,   // auto-load more when scrolling near bottom
+    loadMore: null,          // function(currentLength) -> array | Promise<array>
+    print: false,            // print button in toolbar
+    editor: false,           // crop/rotate/flip toolbar in lightbox
+    annotate: false          // freehand drawing layer in lightbox
   };
 
   /* ========================================================================
@@ -177,12 +197,21 @@
 
     var dataOpts = this._readDataAttributes();
     this._options = mergeOptions(DEFAULTS, mergeOptions(dataOpts, options));
+    this._resolveSystemTheme();
     this._items = this._parseItems();
 
     if (this._items.length === 0) {
       console.warn('NeikiGallery: No items found in container.');
       return;
     }
+
+    // v3 state
+    this._infoPanelOpen = false;
+    this._shortcutsOpen = false;
+    this._favorites = [];
+
+    this._registerGroup();
+    this._loadFavorites();
 
     this._setupGrid();
     this._setupAspectSkeleton();
@@ -193,10 +222,61 @@
     this._setupFilter();
     this._setupVirtualScroll();
     this._setupDragReorder();
+    this._setupInfiniteScroll();
     this._buildLightbox();
+    this._buildInfoPanel();
+    this._buildShortcutsHelp();
+    this._buildEditor();
+    this._buildAnnotation();
+    this._buildContextMenu();
     this._bindEvents();
+    this._bindContextMenu();
+    this._setupSlideshowPauseOnHover();
+    this._refreshAllFavoriteUI();
+    this._initPlugins();
     this._checkHash();
   }
+
+  NeikiGallery.prototype._resolveSystemTheme = function () {
+    if (this._options.theme !== 'system') return;
+    var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    this._options.theme = prefersDark ? 'dark' : 'light';
+    // Listen for changes
+    if (window.matchMedia) {
+      var self = this;
+      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      this._systemThemeListener = function (e) {
+        var t = e.matches ? 'dark' : 'light';
+        self._options.theme = t;
+        if (self._container) self._container.setAttribute('data-theme', t);
+        if (self._lightbox) self._lightbox.setAttribute('data-theme', t);
+      };
+      if (mq.addEventListener) mq.addEventListener('change', this._systemThemeListener);
+      else if (mq.addListener) mq.addListener(this._systemThemeListener);
+      this._systemThemeMQ = mq;
+    }
+  };
+
+  NeikiGallery.prototype._resolveSlideshowOpts = function () {
+    var s = this._options.slideshow;
+    if (!s) return null;
+    if (typeof s === 'object') {
+      return {
+        enabled: true,
+        interval: s.interval || 4000,
+        pauseOnHover: !!s.pauseOnHover,
+        kenburns: !!s.kenburns,
+        direction: s.direction || 'forward'
+      };
+    }
+    return {
+      enabled: true,
+      interval: 4000,
+      pauseOnHover: false,
+      kenburns: false,
+      direction: 'forward'
+    };
+  };
 
   /* ========================================================================
      Data Attributes
@@ -227,8 +307,23 @@
     if (boolAttr('data-fullscreen') !== undefined) opts.fullscreen = boolAttr('data-fullscreen');
     if (boolAttr('data-hash-navigation') !== undefined) opts.hashNavigation = boolAttr('data-hash-navigation');
     if (boolAttr('data-stagger') !== undefined) opts.stagger = boolAttr('data-stagger');
-    if (boolAttr('data-slideshow') !== undefined) opts.slideshow = boolAttr('data-slideshow');
-    if (numAttr('data-slideshow-interval') !== undefined) opts.slideshowInterval = numAttr('data-slideshow-interval');
+    // Slideshow: data-slideshow="true" enables; data-slideshow-interval, data-slideshow-pause-on-hover, data-slideshow-kenburns build nested config
+    var slideshowEnabled = boolAttr('data-slideshow');
+    var ssInterval = numAttr('data-slideshow-interval');
+    var ssPause = boolAttr('data-slideshow-pause-on-hover');
+    var ssKenburns = boolAttr('data-slideshow-kenburns');
+    if (slideshowEnabled !== undefined || ssInterval !== undefined || ssPause !== undefined || ssKenburns !== undefined) {
+      if (slideshowEnabled === false) {
+        opts.slideshow = false;
+      } else {
+        opts.slideshow = {
+          interval: ssInterval !== undefined ? ssInterval : 4000,
+          pauseOnHover: !!ssPause,
+          kenburns: !!ssKenburns
+        };
+      }
+    }
+    if (strAttr('data-counter-format') !== undefined) opts.counterFormat = strAttr('data-counter-format');
     if (boolAttr('data-share') !== undefined) opts.share = boolAttr('data-share');
     if (boolAttr('data-filter') !== undefined) opts.filter = boolAttr('data-filter');
     if (boolAttr('data-batch-select') !== undefined) opts.batchSelect = boolAttr('data-batch-select');
@@ -243,6 +338,17 @@
     if (boolAttr('data-morph-transition') !== undefined) opts.morphTransition = boolAttr('data-morph-transition');
     if (boolAttr('data-color-palette') !== undefined) opts.colorPalette = boolAttr('data-color-palette');
     if (boolAttr('data-aspect-skeleton') !== undefined) opts.aspectSkeleton = boolAttr('data-aspect-skeleton');
+    // v3.0.0
+    if (boolAttr('data-video') !== undefined) opts.video = boolAttr('data-video');
+    if (strAttr('data-group') !== undefined) opts.group = strAttr('data-group');
+    if (boolAttr('data-favorites') !== undefined) opts.favorites = boolAttr('data-favorites');
+    if (boolAttr('data-info-panel') !== undefined) opts.infoPanel = boolAttr('data-info-panel');
+    if (boolAttr('data-context-menu') !== undefined) opts.contextMenu = boolAttr('data-context-menu');
+    if (boolAttr('data-shortcuts-help') !== undefined) opts.shortcutsHelp = boolAttr('data-shortcuts-help');
+    if (boolAttr('data-infinite-scroll') !== undefined) opts.infiniteScroll = boolAttr('data-infinite-scroll');
+    if (boolAttr('data-print') !== undefined) opts.print = boolAttr('data-print');
+    if (boolAttr('data-editor') !== undefined) opts.editor = boolAttr('data-editor');
+    if (boolAttr('data-annotate') !== undefined) opts.annotate = boolAttr('data-annotate');
     return opts;
   };
 
@@ -256,8 +362,10 @@
     for (var i = 0; i < anchors.length; i++) {
       var a = anchors[i];
       var img = $('img', a);
+      var src = a.getAttribute('href') || (img ? img.getAttribute('src') : '');
+      var explicitType = a.getAttribute('data-type');
       items.push({
-        src: a.getAttribute('href') || (img ? img.getAttribute('src') : ''),
+        src: src,
         thumb: img ? (img.getAttribute('data-src') || img.getAttribute('src')) : '',
         caption: a.getAttribute('data-caption') || (img ? img.getAttribute('alt') : '') || '',
         tags: (a.getAttribute('data-tags') || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean),
@@ -266,6 +374,10 @@
         blurhash: a.getAttribute('data-blurhash') || (img ? img.getAttribute('data-blurhash') : '') || '',
         width: parseInt(a.getAttribute('data-width') || (img ? img.getAttribute('data-width') || img.getAttribute('width') : ''), 10) || 0,
         height: parseInt(a.getAttribute('data-height') || (img ? img.getAttribute('data-height') || img.getAttribute('height') : ''), 10) || 0,
+        // v3.0.0
+        poster: a.getAttribute('data-poster') || '',
+        group: a.getAttribute('data-group') || '',
+        mediaType: explicitType || (this._options.video ? detectMediaType(src) : 'image'),
         element: a,
         img: img
       });
@@ -929,6 +1041,60 @@
     }, ICONS.play);
     this._toolbar.appendChild(this._playBtn);
 
+    // Favorite button (v3)
+    if (opts.favorites) {
+      this._favBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__fav', {
+        'aria-label': 'Toggle favorite',
+        type: 'button'
+      }, ICONS.heart);
+      this._toolbar.appendChild(this._favBtn);
+    }
+
+    // Info panel button (v3)
+    if (opts.infoPanel) {
+      this._infoBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__info-btn', {
+        'aria-label': 'Image info',
+        type: 'button'
+      }, ICONS.info);
+      this._toolbar.appendChild(this._infoBtn);
+    }
+
+    // Editor button (v3)
+    if (opts.editor) {
+      this._editBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__edit', {
+        'aria-label': 'Edit image',
+        type: 'button'
+      }, ICONS.edit);
+      this._toolbar.appendChild(this._editBtn);
+    }
+
+    // Annotate button (v3)
+    if (opts.annotate) {
+      this._annotateBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__annotate-btn', {
+        'aria-label': 'Annotate image',
+        type: 'button'
+      }, ICONS.draw);
+      this._toolbar.appendChild(this._annotateBtn);
+    }
+
+    // Shortcuts help button (v3)
+    if (opts.shortcutsHelp) {
+      this._helpBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__help', {
+        'aria-label': 'Keyboard shortcuts',
+        type: 'button'
+      }, ICONS.help);
+      this._toolbar.appendChild(this._helpBtn);
+    }
+
+    // Print button (v3)
+    if (opts.print) {
+      this._printBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__print', {
+        'aria-label': 'Print image',
+        type: 'button'
+      }, ICONS.print);
+      this._toolbar.appendChild(this._printBtn);
+    }
+
     // Share button
     if (opts.share) {
       this._shareBtn = createElement('button', 'neiki-lightbox__btn neiki-lightbox__share', {
@@ -1095,6 +1261,54 @@
       });
     }
 
+    // Favorite (v3)
+    if (this._favBtn) {
+      this._favBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        self.toggleFavorite();
+      });
+    }
+
+    // Info panel (v3)
+    if (this._infoBtn) {
+      this._infoBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        self.toggleInfoPanel();
+      });
+    }
+
+    // Editor (v3)
+    if (this._editBtn) {
+      this._editBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        self.openEditor();
+      });
+    }
+
+    // Annotate (v3)
+    if (this._annotateBtn) {
+      this._annotateBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        self.openAnnotate();
+      });
+    }
+
+    // Shortcuts help (v3)
+    if (this._helpBtn) {
+      this._helpBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        self.toggleShortcutsHelp();
+      });
+    }
+
+    // Print (v3)
+    if (this._printBtn) {
+      this._printBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        self.print();
+      });
+    }
+
     // Share
     if (this._shareBtn) {
       this._shareBtn.addEventListener('click', function (e) {
@@ -1168,6 +1382,10 @@
     switch (e.key) {
       case 'Escape':
         e.preventDefault();
+        if (this._shortcutsOpen) { this.toggleShortcutsHelp(false); return; }
+        if (this._editorOverlay && this._editorOverlay.classList.contains('neiki-editor--visible')) { this.closeEditor(); return; }
+        if (this._annotateOverlay && this._annotateOverlay.classList.contains('neiki-annotate--visible')) { this.closeAnnotate(); return; }
+        if (this._infoPanelOpen) { this.toggleInfoPanel(false); return; }
         if (this._shareVisible) { this._toggleSharePopup(); return; }
         this.close();
         break;
@@ -1188,12 +1406,34 @@
         this._goTo(this._items.length - 1);
         break;
       case 'f':
+      case 'F':
         e.preventDefault();
         this._toggleFullscreen();
         break;
       case ' ':
         e.preventDefault();
         this.toggleSlideshow();
+        break;
+      case 'z':
+      case 'Z':
+        e.preventDefault();
+        this._toggleZoom();
+        break;
+      case 'i':
+      case 'I':
+        if (this._options.infoPanel) { e.preventDefault(); this.toggleInfoPanel(); }
+        break;
+      case 'b':
+      case 'B':
+        if (this._options.favorites) { e.preventDefault(); this.toggleFavorite(); }
+        break;
+      case 'p':
+      case 'P':
+        e.preventDefault();
+        this.print();
+        break;
+      case '?':
+        if (this._options.shortcutsHelp) { e.preventDefault(); this.toggleShortcutsHelp(); }
         break;
     }
   };
@@ -1259,6 +1499,12 @@
     this._currentIndex = index;
     var item = this._items[index];
 
+    // Stop any playing media from the previous slide (v3)
+    this._stopAllMedia && this._stopAllMedia();
+
+    // Remove kenburns class from previous (v3)
+    this._removeKenburns && this._removeKenburns();
+
     // Reset zoom
     this._resetZoom();
 
@@ -1268,11 +1514,25 @@
     // Update nav
     this._updateNavButtons();
 
+    // Clear any previous embed/video element
+    this._clearMediaSlide();
+
+    // Render non-image media (v3) — short-circuits image flow
+    if (item.mediaType && item.mediaType !== 'image') {
+      this._spinner.classList.add('neiki-hidden');
+      this._image.style.display = 'none';
+      this._renderMediaSlide(item, this._slideWrapper);
+      this._postGoToCommon(item, index, prevIndex);
+      return;
+    }
+    this._image.style.display = '';
+
     // Spinner
     this._spinner.classList.remove('neiki-hidden');
 
     var self = this;
     var img = this._image;
+    this._currentImg = img;
 
     // Slide transition
     if (this._options.transition === 'slide') {
@@ -1321,9 +1581,15 @@
     tempImg.src = item.src;
     if (tempImg.complete) onLoad();
 
-    // Counter
+    this._postGoToCommon(item, index, prevIndex, skipHash);
+  };
+
+  NeikiGallery.prototype._postGoToCommon = function (item, index, prevIndex, skipHash) {
+    var len = this._items.length;
+
+    // Counter (with v3 counterFormat tokens)
     if (this._counter) {
-      this._counter.textContent = (index + 1) + ' / ' + len;
+      this._counter.textContent = this._formatCounter(index, len);
     }
 
     // Caption
@@ -1350,18 +1616,49 @@
     this._preloadAdjacent(index);
 
     // Backdrop tint
-    this._applyBackdropTint(item.src);
+    this._applyBackdropTint && this._applyBackdropTint(item.src);
 
     // EXIF
-    this._loadExif(item.src);
+    this._loadExif && this._loadExif(item.src);
 
     // Color palette
-    this._loadPalette(item.src);
+    this._loadPalette && this._loadPalette(item.src);
+
+    // v3: Update info panel + favorite UI + kenburns
+    if (this._infoPanelOpen) this._populateInfoPanel(index);
+    this._updateFavoriteUI && this._updateFavoriteUI(index);
+    this._applyKenburns && this._applyKenburns();
+
+    // Plugin hook
+    this._callPluginHook && this._callPluginHook('change', { index: index, item: item, prevIndex: prevIndex });
 
     // Restart slideshow timer if running
     if (this._slideshowRunning) this._startSlideshowTimer();
 
     this._emit('change', index);
+  };
+
+  NeikiGallery.prototype._formatCounter = function (index, total) {
+    var fmt = this._options.counterFormat || '{current} / {total}';
+    var current = index + 1;
+    // If part of a group, use group totals
+    if (this._groupName) {
+      var groupItems = this._getGroupItems();
+      if (groupItems && groupItems.length) {
+        total = groupItems.length;
+        current = this._getGroupCurrentIndex() + 1;
+      }
+    }
+    var percent = Math.round((current / total) * 100);
+    return fmt.replace(/\{current\}/g, current).replace(/\{total\}/g, total).replace(/\{percent\}/g, percent);
+  };
+
+  NeikiGallery.prototype._clearMediaSlide = function () {
+    if (!this._slideWrapper) return;
+    var media = this._slideWrapper.querySelectorAll('.neiki-lightbox__video, .neiki-lightbox__embed');
+    for (var i = 0; i < media.length; i++) {
+      if (media[i].parentNode) media[i].parentNode.removeChild(media[i]);
+    }
   };
 
   NeikiGallery.prototype._updateNavButtons = function () {
@@ -1476,11 +1773,23 @@
     this._emit('slideshowStop');
   };
 
+  NeikiGallery.prototype.pauseSlideshow = function () {
+    // Alias for stopSlideshow but doesn't emit 'slideshowStop' for hover pauses
+    this._clearSlideshowTimer();
+    if (this._progressBar) {
+      this._progressBar.classList.remove('neiki-progress--running');
+      this._progressBar.style.width = '0%';
+    }
+    this._slideshowRunning = false;
+    if (this._playBtn) this._playBtn.innerHTML = ICONS.play;
+  };
+
   NeikiGallery.prototype._startSlideshowTimer = function () {
     var self = this;
     this._clearSlideshowTimer();
 
-    var interval = this._options.slideshowInterval;
+    var ssOpts = this._resolveSlideshowOpts() || { interval: 4000, direction: 'forward' };
+    var interval = ssOpts.interval;
 
     // Reset progress bar
     this._progressBar.classList.remove('neiki-progress--running');
@@ -1494,14 +1803,14 @@
 
     this._slideshowTimer = setTimeout(function () {
       if (!self._slideshowRunning || !self._isOpen) return;
-      var nextIndex = self._currentIndex + 1;
+      var step = ssOpts.direction === 'reverse' ? -1 : 1;
+      var nextIndex = self._currentIndex + step;
       if (nextIndex >= self._items.length) {
-        if (self._options.loop) {
-          nextIndex = 0;
-        } else {
-          self.stopSlideshow();
-          return;
-        }
+        if (self._options.loop) nextIndex = 0;
+        else { self.stopSlideshow(); return; }
+      } else if (nextIndex < 0) {
+        if (self._options.loop) nextIndex = self._items.length - 1;
+        else { self.stopSlideshow(); return; }
       }
       self._goTo(nextIndex);
     }, interval);
@@ -1896,14 +2205,21 @@
      Hash Navigation
      ======================================================================== */
 
+  NeikiGallery.prototype._hashSlug = function () {
+    // Use container id (or group name) for cleaner URLs; fall back to numeric id
+    var slug = this._container.id || this._groupName || ('gallery-' + this._id);
+    return slug;
+  };
+
   NeikiGallery.prototype._setHash = function (index) {
     if (typeof index === 'number' && this._isOpen) {
-      history.replaceState(null, '', '#neiki-' + this._id + '=' + (index + 1));
+      history.replaceState(null, '', '#' + this._hashSlug() + '/' + (index + 1));
     }
   };
 
   NeikiGallery.prototype._clearHash = function () {
-    if (window.location.hash.indexOf('#neiki-' + this._id + '=') === 0) {
+    var prefix = '#' + this._hashSlug() + '/';
+    if (window.location.hash.indexOf(prefix) === 0) {
       history.replaceState(null, '', window.location.pathname + window.location.search);
     }
   };
@@ -1911,7 +2227,7 @@
   NeikiGallery.prototype._checkHash = function () {
     if (!this._options.hashNavigation) return;
     var hash = window.location.hash;
-    var prefix = '#neiki-' + this._id + '=';
+    var prefix = '#' + this._hashSlug() + '/';
     if (hash.indexOf(prefix) === 0) {
       var idx = parseInt(hash.substring(prefix.length), 10);
       if (!isNaN(idx) && idx >= 1 && idx <= this._items.length) {
@@ -1959,6 +2275,7 @@
     // Auto-start slideshow if option is set
     if (this._options.slideshow) this.startSlideshow();
 
+    this._callPluginHook && this._callPluginHook('open', { index: index });
     this._emit('open', index);
   };
 
@@ -1968,6 +2285,17 @@
 
     // Stop slideshow
     this.stopSlideshow();
+
+    // v3: Stop any playing media
+    this._stopAllMedia && this._stopAllMedia();
+    this._clearMediaSlide && this._clearMediaSlide();
+
+    // v3: Close any open overlays
+    if (this._infoPanelOpen) this.toggleInfoPanel(false);
+    if (this._shortcutsOpen) this.toggleShortcutsHelp(false);
+    if (this._editorOverlay) this.closeEditor();
+    if (this._annotateOverlay) this.closeAnnotate();
+    this._hideContextMenu && this._hideContextMenu();
 
     // Exit PiP
     if (this._pipActive) {
@@ -1998,14 +2326,17 @@
 
     if (this._options.hashNavigation) this._clearHash();
 
+    this._callPluginHook && this._callPluginHook('close');
     this._emit('close');
   };
 
   NeikiGallery.prototype.next = function () {
+    if (this._navigateGroup && this._navigateGroup(1)) return;
     this._goTo(this._currentIndex + 1);
   };
 
   NeikiGallery.prototype.prev = function () {
+    if (this._navigateGroup && this._navigateGroup(-1)) return;
     this._goTo(this._currentIndex - 1);
   };
 
@@ -2016,11 +2347,25 @@
   };
 
   NeikiGallery.prototype.off = function (event, callback) {
+    if (!callback) {
+      // Remove all listeners for this event when no callback specified
+      delete this._events[event];
+      return this;
+    }
     var listeners = this._events[event];
     if (listeners) {
       this._events[event] = listeners.filter(function (fn) { return fn !== callback; });
     }
     return this;
+  };
+
+  NeikiGallery.prototype.once = function (event, callback) {
+    var self = this;
+    var wrapper = function (data) {
+      callback(data);
+      self.off(event, wrapper);
+    };
+    return this.on(event, wrapper);
   };
 
   NeikiGallery.prototype.filter = function (tag) {
@@ -2061,12 +2406,34 @@
 
     if (this._storyOpen) this._exitStoryMode();
 
+    // v3: destroy plugins, unregister group, remove system theme listener
+    this._destroyPlugins && this._destroyPlugins();
+    this._unregisterGroup && this._unregisterGroup();
+    this._callPluginHook && this._callPluginHook('destroy');
+
+    if (this._systemThemeMQ && this._systemThemeListener) {
+      if (this._systemThemeMQ.removeEventListener) this._systemThemeMQ.removeEventListener('change', this._systemThemeListener);
+      else if (this._systemThemeMQ.removeListener) this._systemThemeMQ.removeListener(this._systemThemeListener);
+    }
+
+    if (this._infiniteObserver) {
+      this._infiniteObserver.disconnect();
+      this._infiniteObserver = null;
+    }
+    if (this._infiniteSentinel && this._infiniteSentinel.parentNode) {
+      this._infiniteSentinel.parentNode.removeChild(this._infiniteSentinel);
+    }
+
     if (this._lightbox && this._lightbox.parentNode) {
       this._lightbox.parentNode.removeChild(this._lightbox);
     }
 
     if (this._filterBar && this._filterBar.parentNode) {
       this._filterBar.parentNode.removeChild(this._filterBar);
+    }
+
+    if (this._contextMenu && this._contextMenu.parentNode) {
+      this._contextMenu.parentNode.removeChild(this._contextMenu);
     }
 
     this._container.classList.remove('neiki-gallery', 'neiki-gallery--masonry', 'neiki-gallery--grid', 'neiki-gallery--mosaic', 'neiki-gallery--filmstrip', 'neiki-gallery--stagger');
@@ -2163,6 +2530,1028 @@
   };
 
   /* ========================================================================
+     v3.0.0 — Plugin System
+     ======================================================================== */
+
+  var PLUGIN_REGISTRY = {};
+
+  NeikiGallery.registerPlugin = function (name, factory) {
+    if (typeof name !== 'string' || typeof factory !== 'function') {
+      throw new Error('NeikiGallery.registerPlugin(name, factory) requires a string name and function factory');
+    }
+    PLUGIN_REGISTRY[name] = factory;
+  };
+
+  NeikiGallery.unregisterPlugin = function (name) {
+    delete PLUGIN_REGISTRY[name];
+  };
+
+  NeikiGallery.getRegisteredPlugins = function () {
+    return Object.keys(PLUGIN_REGISTRY);
+  };
+
+  NeikiGallery.prototype._initPlugins = function () {
+    this._plugins = {};
+    var pluginsOpt = this._options.plugins;
+    if (!pluginsOpt || !pluginsOpt.length) return;
+
+    var self = this;
+    pluginsOpt.forEach(function (entry) {
+      var name, opts;
+      if (typeof entry === 'string') {
+        name = entry;
+        opts = {};
+      } else if (entry && typeof entry === 'object') {
+        name = entry.name;
+        opts = entry;
+      } else {
+        return;
+      }
+      var factory = PLUGIN_REGISTRY[name];
+      if (!factory) {
+        if (window.console && console.warn) {
+          console.warn('[NeikiGallery] Plugin not found: ' + name);
+        }
+        return;
+      }
+      try {
+        var instance = factory(self, opts) || {};
+        self._plugins[name] = instance;
+        if (typeof instance.init === 'function') instance.init();
+      } catch (err) {
+        if (window.console && console.error) {
+          console.error('[NeikiGallery] Plugin "' + name + '" init failed:', err);
+        }
+      }
+    });
+  };
+
+  NeikiGallery.prototype._callPluginHook = function (hook, data) {
+    if (!this._plugins) return;
+    for (var name in this._plugins) {
+      if (this._plugins.hasOwnProperty(name)) {
+        var inst = this._plugins[name];
+        if (inst && typeof inst[hook] === 'function') {
+          try { inst[hook](data); } catch (e) { /* swallow */ }
+        }
+      }
+    }
+  };
+
+  NeikiGallery.prototype._destroyPlugins = function () {
+    if (!this._plugins) return;
+    for (var name in this._plugins) {
+      if (this._plugins.hasOwnProperty(name)) {
+        var inst = this._plugins[name];
+        if (inst && typeof inst.destroy === 'function') {
+          try { inst.destroy(); } catch (e) { /* swallow */ }
+        }
+      }
+    }
+    this._plugins = {};
+  };
+
+  NeikiGallery.prototype.plugin = function (name) {
+    return this._plugins ? this._plugins[name] : null;
+  };
+
+  /* ========================================================================
+     v3.0.0 — Video & Embed Support
+     ======================================================================== */
+
+  var YOUTUBE_RE = /(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i;
+  var VIMEO_RE = /vimeo\.com\/(?:video\/)?(\d+)/i;
+  var VIDEO_EXT_RE = /\.(mp4|webm|ogv|mov|m4v)(\?.*)?$/i;
+
+  function detectMediaType(url) {
+    if (!url) return 'image';
+    if (YOUTUBE_RE.test(url)) return 'youtube';
+    if (VIMEO_RE.test(url)) return 'vimeo';
+    if (VIDEO_EXT_RE.test(url)) return 'video';
+    return 'image';
+  }
+
+  function youtubeEmbedUrl(url) {
+    var m = url.match(YOUTUBE_RE);
+    if (!m) return null;
+    return 'https://www.youtube.com/embed/' + m[1] + '?rel=0&autoplay=1';
+  }
+
+  function vimeoEmbedUrl(url) {
+    var m = url.match(VIMEO_RE);
+    if (!m) return null;
+    return 'https://player.vimeo.com/video/' + m[1] + '?autoplay=1';
+  }
+
+  NeikiGallery.detectMediaType = detectMediaType;
+
+  NeikiGallery.prototype._renderMediaSlide = function (item, slideEl) {
+    var type = item.mediaType || detectMediaType(item.src);
+    item.mediaType = type;
+    if (type === 'image') return null;
+
+    if (type === 'video') {
+      var video = createElement('video', 'neiki-lightbox__video', {
+        src: item.src,
+        controls: 'true',
+        playsinline: 'true',
+        preload: 'metadata'
+      });
+      if (item.poster) video.setAttribute('poster', item.poster);
+      slideEl.appendChild(video);
+      try { video.play().catch(function () {}); } catch (e) { /* ignore */ }
+      return video;
+    }
+
+    if (type === 'youtube' || type === 'vimeo') {
+      var src = type === 'youtube' ? youtubeEmbedUrl(item.src) : vimeoEmbedUrl(item.src);
+      if (!src) return null;
+      var iframe = createElement('iframe', 'neiki-lightbox__embed', {
+        src: src,
+        frameborder: '0',
+        allow: 'autoplay; fullscreen; picture-in-picture',
+        allowfullscreen: 'true',
+        loading: 'lazy'
+      });
+      slideEl.appendChild(iframe);
+      return iframe;
+    }
+    return null;
+  };
+
+  NeikiGallery.prototype._stopAllMedia = function () {
+    if (!this._slideWrapper) return;
+    var videos = this._slideWrapper.querySelectorAll('video');
+    for (var i = 0; i < videos.length; i++) {
+      try { videos[i].pause(); } catch (e) { /* ignore */ }
+    }
+    var iframes = this._slideWrapper.querySelectorAll('iframe.neiki-lightbox__embed');
+    for (var j = 0; j < iframes.length; j++) {
+      var src = iframes[j].src;
+      iframes[j].src = '';
+      iframes[j].src = src.replace('autoplay=1', 'autoplay=0');
+    }
+  };
+
+  /* ========================================================================
+     v3.0.0 — Grouped / Album Navigation
+     ======================================================================== */
+
+  var GROUP_REGISTRY = {};
+
+  NeikiGallery.prototype._registerGroup = function () {
+    var group = this._options.group || this._container.getAttribute('data-group');
+    if (!group) return;
+    this._groupName = group;
+    if (!GROUP_REGISTRY[group]) GROUP_REGISTRY[group] = [];
+    GROUP_REGISTRY[group].push(this);
+  };
+
+  NeikiGallery.prototype._unregisterGroup = function () {
+    if (!this._groupName) return;
+    var arr = GROUP_REGISTRY[this._groupName];
+    if (!arr) return;
+    var idx = arr.indexOf(this);
+    if (idx !== -1) arr.splice(idx, 1);
+    if (arr.length === 0) delete GROUP_REGISTRY[this._groupName];
+  };
+
+  NeikiGallery.prototype._getGroupItems = function () {
+    if (!this._groupName) return null;
+    var galleries = GROUP_REGISTRY[this._groupName] || [];
+    var combined = [];
+    galleries.forEach(function (g) {
+      g._items.forEach(function (item) {
+        combined.push({ gallery: g, item: item, originalIndex: g._items.indexOf(item) });
+      });
+    });
+    return combined;
+  };
+
+  NeikiGallery.prototype._getGroupTotalCount = function () {
+    var items = this._getGroupItems();
+    return items ? items.length : this._items.length;
+  };
+
+  NeikiGallery.prototype._getGroupCurrentIndex = function () {
+    if (!this._groupName) return this._currentIndex;
+    var items = this._getGroupItems();
+    if (!items) return this._currentIndex;
+    var self = this;
+    var idx = -1;
+    items.forEach(function (entry, i) {
+      if (entry.gallery === self && entry.originalIndex === self._currentIndex) idx = i;
+    });
+    return idx === -1 ? this._currentIndex : idx;
+  };
+
+  NeikiGallery.prototype._navigateGroup = function (delta) {
+    if (!this._groupName) return false;
+    var items = this._getGroupItems();
+    if (!items || items.length <= 1) return false;
+    var current = this._getGroupCurrentIndex();
+    var next = current + delta;
+    if (next < 0 || next >= items.length) {
+      if (this._options.loop) {
+        next = (next + items.length) % items.length;
+      } else {
+        return true;
+      }
+    }
+    var targetEntry = items[next];
+    if (targetEntry.gallery === this) {
+      this._goTo(targetEntry.originalIndex);
+    } else {
+      this.close();
+      targetEntry.gallery.open(targetEntry.originalIndex);
+    }
+    return true;
+  };
+
+  /* ========================================================================
+     v3.0.0 — Favorites / Bookmarks
+     ======================================================================== */
+
+  var FAVORITES_KEY_PREFIX = 'neiki-gallery-favorites:';
+
+  NeikiGallery.prototype._loadFavorites = function () {
+    if (!this._options.favorites) {
+      this._favorites = [];
+      return;
+    }
+    var key = this._options.favoritesKey || (this._container.id || 'default');
+    this._favoritesStorageKey = FAVORITES_KEY_PREFIX + key;
+    try {
+      var raw = window.localStorage.getItem(this._favoritesStorageKey);
+      this._favorites = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      this._favorites = [];
+    }
+  };
+
+  NeikiGallery.prototype._saveFavorites = function () {
+    if (!this._favoritesStorageKey) return;
+    try {
+      window.localStorage.setItem(this._favoritesStorageKey, JSON.stringify(this._favorites));
+    } catch (e) { /* quota exceeded */ }
+  };
+
+  NeikiGallery.prototype.isFavorite = function (index) {
+    if (typeof index !== 'number') index = this._currentIndex;
+    var item = this._items[index];
+    if (!item) return false;
+    return this._favorites.indexOf(item.src) !== -1;
+  };
+
+  NeikiGallery.prototype.toggleFavorite = function (index) {
+    if (typeof index !== 'number') index = this._currentIndex;
+    var item = this._items[index];
+    if (!item) return false;
+    var pos = this._favorites.indexOf(item.src);
+    var added;
+    if (pos === -1) {
+      this._favorites.push(item.src);
+      added = true;
+    } else {
+      this._favorites.splice(pos, 1);
+      added = false;
+    }
+    this._saveFavorites();
+    this._updateFavoriteUI(index);
+    this._emit(added ? 'favorite' : 'unfavorite', { index: index, src: item.src });
+    return added;
+  };
+
+  NeikiGallery.prototype.getFavorites = function () {
+    return this._favorites.slice();
+  };
+
+  NeikiGallery.prototype.clearFavorites = function () {
+    this._favorites = [];
+    this._saveFavorites();
+    this._refreshAllFavoriteUI();
+  };
+
+  NeikiGallery.prototype._updateFavoriteUI = function (index) {
+    if (!this._options.favorites) return;
+    if (this._favBtn) {
+      this._favBtn.classList.toggle('neiki-lightbox__fav--active', this.isFavorite(index));
+    }
+    var item = this._items[index];
+    if (item && item.element) {
+      item.element.classList.toggle('neiki-favorited', this._favorites.indexOf(item.src) !== -1);
+    }
+  };
+
+  NeikiGallery.prototype._refreshAllFavoriteUI = function () {
+    if (!this._options.favorites) return;
+    var self = this;
+    this._items.forEach(function (item, i) {
+      item.element.classList.toggle('neiki-favorited', self._favorites.indexOf(item.src) !== -1);
+    });
+    if (this._favBtn) {
+      this._favBtn.classList.toggle('neiki-lightbox__fav--active', this.isFavorite(this._currentIndex));
+    }
+  };
+
+  /* ========================================================================
+     v3.0.0 — Info Panel Sidebar
+     ======================================================================== */
+
+  NeikiGallery.prototype._buildInfoPanel = function () {
+    if (!this._options.infoPanel) return;
+    this._infoPanel = createElement('aside', 'neiki-lightbox__info');
+    this._infoPanel.innerHTML =
+      '<div class="neiki-info__header">' +
+      '<h3 class="neiki-info__title">Image info</h3>' +
+      '<button class="neiki-info__close" type="button" aria-label="Close info panel">' +
+      ICONS.close + '</button>' +
+      '</div>' +
+      '<div class="neiki-info__body"></div>';
+    this._lightbox.appendChild(this._infoPanel);
+    this._infoBody = this._infoPanel.querySelector('.neiki-info__body');
+    var self = this;
+    this._infoPanel.querySelector('.neiki-info__close').addEventListener('click', function () {
+      self.toggleInfoPanel(false);
+    });
+  };
+
+  NeikiGallery.prototype.toggleInfoPanel = function (force) {
+    if (!this._infoPanel) return;
+    var open = typeof force === 'boolean' ? force : !this._infoPanelOpen;
+    this._infoPanelOpen = open;
+    this._lightbox.classList.toggle('neiki-lightbox--info-open', open);
+    if (open) this._populateInfoPanel(this._currentIndex);
+    this._emit(open ? 'infoOpen' : 'infoClose');
+  };
+
+  NeikiGallery.prototype._populateInfoPanel = function (index) {
+    if (!this._infoBody) return;
+    var item = this._items[index];
+    if (!item) return;
+    var html = '';
+    var filename = (item.src || '').split('/').pop().split('?')[0];
+    html += '<dl class="neiki-info__list">';
+    html += '<dt>Filename</dt><dd>' + escapeHtml(filename) + '</dd>';
+    if (item.caption) html += '<dt>Caption</dt><dd>' + escapeHtml(item.caption) + '</dd>';
+    if (item.width && item.height) {
+      html += '<dt>Dimensions</dt><dd>' + item.width + ' × ' + item.height + ' px</dd>';
+    }
+    if (item.tags && item.tags.length) {
+      html += '<dt>Tags</dt><dd>' + item.tags.map(escapeHtml).join(', ') + '</dd>';
+    }
+    if (item.mediaType && item.mediaType !== 'image') {
+      html += '<dt>Type</dt><dd>' + item.mediaType + '</dd>';
+    }
+    html += '<dt>URL</dt><dd><a href="' + escapeAttr(item.src) + '" target="_blank" rel="noopener">Open original</a></dd>';
+    html += '</dl>';
+
+    if (item._exifData) {
+      html += '<h4 class="neiki-info__subtitle">EXIF</h4><dl class="neiki-info__list">';
+      var exif = item._exifData;
+      if (exif.camera) html += '<dt>Camera</dt><dd>' + escapeHtml(exif.camera) + '</dd>';
+      if (exif.lens) html += '<dt>Lens</dt><dd>' + escapeHtml(exif.lens) + '</dd>';
+      if (exif.focalLength) html += '<dt>Focal length</dt><dd>' + escapeHtml(exif.focalLength) + '</dd>';
+      if (exif.aperture) html += '<dt>Aperture</dt><dd>' + escapeHtml(exif.aperture) + '</dd>';
+      if (exif.shutter) html += '<dt>Shutter</dt><dd>' + escapeHtml(exif.shutter) + '</dd>';
+      if (exif.iso) html += '<dt>ISO</dt><dd>' + escapeHtml(exif.iso) + '</dd>';
+      html += '</dl>';
+    }
+    this._infoBody.innerHTML = html;
+  };
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  /* ========================================================================
+     v3.0.0 — Print Support
+     ======================================================================== */
+
+  NeikiGallery.prototype.print = function (index) {
+    if (typeof index !== 'number') index = this._currentIndex;
+    var item = this._items[index];
+    if (!item) return;
+
+    var win = window.open('about:blank', '_blank');
+    if (!win) return;
+    var caption = item.caption ? '<figcaption>' + escapeHtml(item.caption) + '</figcaption>' : '';
+    var doc = win.document;
+    doc.open();
+    doc.write(
+      '<!DOCTYPE html><html><head><title>Print — ' + escapeHtml(item.caption || 'Image') + '</title>' +
+      '<style>' +
+      '@page { margin: 16mm; }' +
+      'body { margin: 0; font-family: system-ui, sans-serif; background: #fff; }' +
+      'figure { margin: 0; text-align: center; }' +
+      'img { max-width: 100%; max-height: 90vh; height: auto; object-fit: contain; display: block; margin: 0 auto; }' +
+      'figcaption { margin-top: 12px; font-size: 14px; color: #333; }' +
+      '@media print { body { background: #fff; -webkit-print-color-adjust: exact; } }' +
+      '</style></head><body>' +
+      '<figure><img src="' + escapeAttr(item.src) + '" alt="' + escapeAttr(item.caption || '') + '">' +
+      caption + '</figure>' +
+      '</body></html>'
+    );
+    doc.close();
+    // Wait for image to load then print
+    var img = win.document.querySelector('img');
+    if (img) {
+      if (img.complete) {
+        win.focus();
+        win.print();
+      } else {
+        img.onload = function () {
+          win.focus();
+          win.print();
+        };
+        img.onerror = function () {
+          win.focus();
+          win.print();
+        };
+      }
+    } else {
+      win.focus();
+      win.print();
+    }
+    this._emit('print', { index: index, src: item.src });
+  };
+
+  /* ========================================================================
+     v3.0.0 — Right-Click Context Menu
+     ======================================================================== */
+
+  NeikiGallery.prototype._buildContextMenu = function () {
+    if (!this._options.contextMenu) return;
+    this._contextMenu = createElement('div', 'neiki-context-menu', { role: 'menu' });
+    document.body.appendChild(this._contextMenu);
+
+    var self = this;
+    this._onContextMenuClickOutside = function (e) {
+      if (!self._contextMenu) return;
+      if (!self._contextMenu.contains(e.target)) self._hideContextMenu();
+    };
+    this._onContextMenuKey = function (e) {
+      if (e.key === 'Escape') self._hideContextMenu();
+    };
+  };
+
+  NeikiGallery.prototype._showContextMenu = function (x, y, index) {
+    if (!this._contextMenu) return;
+    var item = this._items[index];
+    if (!item) return;
+    var self = this;
+
+    var entries = [
+      { label: 'Open original', icon: ICONS.fullscreen, action: function () { window.open(item.src, '_blank', 'noopener'); } },
+      { label: 'Copy link', icon: ICONS.link, action: function () { self._copyToClipboard(item.src); self._showToast('Link copied'); } },
+      { label: 'Download', icon: ICONS.download, action: function () { self._downloadImage(item.src, item.caption); } },
+      { label: 'Share', icon: ICONS.share, action: function () { self._shareItem(item); } }
+    ];
+    if (this._options.print !== false) {
+      entries.push({ label: 'Print', icon: ICONS.fullscreen, action: function () { self.print(index); } });
+    }
+    if (this._options.favorites) {
+      entries.push({
+        label: this.isFavorite(index) ? 'Remove from favorites' : 'Add to favorites',
+        icon: ICONS.heart || ICONS.share,
+        action: function () { self.toggleFavorite(index); }
+      });
+    }
+
+    this._contextMenu.innerHTML = entries.map(function (e, i) {
+      return '<button class="neiki-context-menu__item" type="button" data-idx="' + i + '" role="menuitem">' +
+             '<span class="neiki-context-menu__icon">' + e.icon + '</span>' +
+             '<span class="neiki-context-menu__label">' + e.label + '</span></button>';
+    }).join('');
+
+    Array.prototype.forEach.call(this._contextMenu.querySelectorAll('button'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var i = parseInt(btn.getAttribute('data-idx'), 10);
+        if (entries[i] && entries[i].action) entries[i].action();
+        self._hideContextMenu();
+      });
+    });
+
+    this._contextMenu.style.left = x + 'px';
+    this._contextMenu.style.top = y + 'px';
+    this._contextMenu.classList.add('neiki-context-menu--visible');
+
+    // Position adjust to viewport
+    var rect = this._contextMenu.getBoundingClientRect();
+    if (rect.right > window.innerWidth) {
+      this._contextMenu.style.left = (window.innerWidth - rect.width - 8) + 'px';
+    }
+    if (rect.bottom > window.innerHeight) {
+      this._contextMenu.style.top = (window.innerHeight - rect.height - 8) + 'px';
+    }
+
+    document.addEventListener('click', this._onContextMenuClickOutside);
+    document.addEventListener('keydown', this._onContextMenuKey);
+  };
+
+  NeikiGallery.prototype._hideContextMenu = function () {
+    if (!this._contextMenu) return;
+    this._contextMenu.classList.remove('neiki-context-menu--visible');
+    document.removeEventListener('click', this._onContextMenuClickOutside);
+    document.removeEventListener('keydown', this._onContextMenuKey);
+  };
+
+  NeikiGallery.prototype._bindContextMenu = function () {
+    if (!this._options.contextMenu) return;
+    var self = this;
+    this._items.forEach(function (item, idx) {
+      item.element.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+        self._showContextMenu(e.clientX, e.clientY, idx);
+      });
+    });
+  };
+
+  NeikiGallery.prototype._downloadImage = function (src, caption) {
+    var a = document.createElement('a');
+    a.href = src;
+    a.download = (caption || 'image').replace(/[^a-z0-9_\-]+/gi, '_') + '.jpg';
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { a.parentNode && a.parentNode.removeChild(a); }, 100);
+  };
+
+  NeikiGallery.prototype._shareItem = function (item) {
+    if (navigator.share) {
+      navigator.share({
+        title: item.caption || 'Image',
+        url: item.src
+      }).catch(function () {});
+    } else {
+      this._copyToClipboard(item.src);
+      this._showToast('Link copied');
+    }
+  };
+
+  /* ========================================================================
+     v3.0.0 — Keyboard Shortcuts Help Overlay
+     ======================================================================== */
+
+  var DEFAULT_SHORTCUTS = [
+    { keys: ['←', '→'], desc: 'Previous / Next image' },
+    { keys: ['Home', 'End'], desc: 'First / Last image' },
+    { keys: ['Esc'], desc: 'Close lightbox' },
+    { keys: ['F'], desc: 'Toggle fullscreen' },
+    { keys: ['Space'], desc: 'Play / Pause slideshow' },
+    { keys: ['Z'], desc: 'Toggle zoom' },
+    { keys: ['I'], desc: 'Toggle info panel' },
+    { keys: ['B'], desc: 'Toggle favorite (bookmark)' },
+    { keys: ['P'], desc: 'Print current image' },
+    { keys: ['?'], desc: 'Show this help' }
+  ];
+
+  NeikiGallery.prototype._buildShortcutsHelp = function () {
+    if (!this._options.shortcutsHelp) return;
+    this._shortcutsOverlay = createElement('div', 'neiki-shortcuts');
+    var list = DEFAULT_SHORTCUTS.map(function (s) {
+      var keys = s.keys.map(function (k) { return '<kbd>' + k + '</kbd>'; }).join(' ');
+      return '<li><span class="neiki-shortcuts__keys">' + keys + '</span>' +
+             '<span class="neiki-shortcuts__desc">' + s.desc + '</span></li>';
+    }).join('');
+    this._shortcutsOverlay.innerHTML =
+      '<div class="neiki-shortcuts__panel" role="dialog" aria-label="Keyboard shortcuts">' +
+      '<div class="neiki-shortcuts__header">' +
+      '<h3>Keyboard shortcuts</h3>' +
+      '<button class="neiki-shortcuts__close" type="button" aria-label="Close">' + ICONS.close + '</button>' +
+      '</div>' +
+      '<ul class="neiki-shortcuts__list">' + list + '</ul>' +
+      '</div>';
+    this._lightbox.appendChild(this._shortcutsOverlay);
+    var self = this;
+    this._shortcutsOverlay.querySelector('.neiki-shortcuts__close').addEventListener('click', function () {
+      self.toggleShortcutsHelp(false);
+    });
+    this._shortcutsOverlay.addEventListener('click', function (e) {
+      if (e.target === self._shortcutsOverlay) self.toggleShortcutsHelp(false);
+    });
+  };
+
+  NeikiGallery.prototype.toggleShortcutsHelp = function (force) {
+    if (!this._shortcutsOverlay) return;
+    var show = typeof force === 'boolean' ? force : !this._shortcutsOpen;
+    this._shortcutsOpen = show;
+    this._shortcutsOverlay.classList.toggle('neiki-shortcuts--visible', show);
+  };
+
+  /* ========================================================================
+     v3.0.0 — Infinite Scroll, append(), remove()
+     ======================================================================== */
+
+  NeikiGallery.prototype._setupInfiniteScroll = function () {
+    if (!this._options.infiniteScroll || typeof this._options.loadMore !== 'function') return;
+    var self = this;
+    this._infiniteSentinel = createElement('div', 'neiki-infinite-sentinel');
+    this._container.parentNode.insertBefore(this._infiniteSentinel, this._container.nextSibling);
+
+    if (!('IntersectionObserver' in window)) return;
+
+    this._infiniteLoading = false;
+    this._infiniteObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting && !self._infiniteLoading && !self._infiniteDone) {
+          self._loadMoreItems();
+        }
+      });
+    }, { rootMargin: '300px' });
+    this._infiniteObserver.observe(this._infiniteSentinel);
+  };
+
+  NeikiGallery.prototype._loadMoreItems = function () {
+    var self = this;
+    if (this._infiniteLoading) return;
+    this._infiniteLoading = true;
+    this._infiniteSentinel.classList.add('neiki-infinite-sentinel--loading');
+
+    var result = this._options.loadMore.call(this, this._items.length);
+    Promise.resolve(result).then(function (newItems) {
+      self._infiniteLoading = false;
+      self._infiniteSentinel.classList.remove('neiki-infinite-sentinel--loading');
+      if (!newItems || !newItems.length) {
+        self._infiniteDone = true;
+        if (self._infiniteObserver) self._infiniteObserver.disconnect();
+        self._infiniteSentinel.classList.add('neiki-infinite-sentinel--done');
+        return;
+      }
+      self.append(newItems);
+    }).catch(function () {
+      self._infiniteLoading = false;
+      self._infiniteSentinel.classList.remove('neiki-infinite-sentinel--loading');
+    });
+  };
+
+  NeikiGallery.prototype.append = function (newItems) {
+    if (!newItems || !newItems.length) return;
+    var self = this;
+    newItems.forEach(function (data) {
+      var a = createElement('a', '', { href: data.src || data.href || '#' });
+      if (data.caption) a.setAttribute('data-caption', data.caption);
+      if (data.tags) a.setAttribute('data-tags', Array.isArray(data.tags) ? data.tags.join(',') : data.tags);
+      if (data.size) a.setAttribute('data-size', data.size);
+      if (data.width) a.setAttribute('data-width', data.width);
+      if (data.height) a.setAttribute('data-height', data.height);
+      if (data.group) a.setAttribute('data-group', data.group);
+      var img = createElement('img', '', {
+        src: data.thumb || data.src,
+        alt: data.caption || ''
+      });
+      if (data.focus) img.setAttribute('data-focus', data.focus);
+      if (data.blurhash) img.setAttribute('data-blurhash', data.blurhash);
+      a.appendChild(img);
+      self._container.appendChild(a);
+    });
+    // Reparse items + re-init layout-dependent features
+    this._reparseItems();
+    this._emit('append', newItems);
+  };
+
+  NeikiGallery.prototype.remove = function (index) {
+    if (index < 0 || index >= this._items.length) return;
+    var item = this._items[index];
+    if (item.element && item.element.parentNode) {
+      item.element.parentNode.removeChild(item.element);
+    }
+    this._items.splice(index, 1);
+    if (this._currentIndex >= this._items.length) this._currentIndex = this._items.length - 1;
+    this._emit('remove', { index: index });
+  };
+
+  NeikiGallery.prototype._reparseItems = function () {
+    var oldLen = this._items.length;
+    this._parseItems();
+    // Re-apply features to newly added items
+    if (this._options.lazyLoad) this._observeLazyLoad();
+    if (this._options.focusPoint) this._applyFocusPoints();
+    if (this._options.blurhash) this._applyBlurhashes();
+    if (this._options.aspectSkeleton) this._applyAspectSkeleton();
+    if (this._options.dragReorder) this._setupDragReorder();
+    if (this._options.contextMenu) this._bindContextMenu();
+    this._refreshAllFavoriteUI && this._refreshAllFavoriteUI();
+  };
+
+  /* ========================================================================
+     v3.0.0 — Image Editor (Crop, Rotate, Flip)
+     ======================================================================== */
+
+  NeikiGallery.prototype._buildEditor = function () {
+    if (!this._options.editor) return;
+    this._editorOverlay = createElement('div', 'neiki-editor');
+    this._editorOverlay.innerHTML =
+      '<div class="neiki-editor__toolbar">' +
+      '<button class="neiki-editor__btn" data-action="rotate-ccw" type="button" title="Rotate left">' +
+      '<svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>' +
+      '<button class="neiki-editor__btn" data-action="rotate-cw" type="button" title="Rotate right">' +
+      '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>' +
+      '<button class="neiki-editor__btn" data-action="flip-h" type="button" title="Flip horizontal">' +
+      '<svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M16 7l4 5-4 5"/><path d="M8 7l-4 5 4 5"/></svg></button>' +
+      '<button class="neiki-editor__btn" data-action="flip-v" type="button" title="Flip vertical">' +
+      '<svg viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M7 8l5-4 5 4"/><path d="M7 16l5 4 5-4"/></svg></button>' +
+      '<span class="neiki-editor__sep"></span>' +
+      '<button class="neiki-editor__btn" data-action="reset" type="button" title="Reset">Reset</button>' +
+      '<button class="neiki-editor__btn neiki-editor__btn--primary" data-action="export" type="button" title="Export">Export</button>' +
+      '<button class="neiki-editor__btn" data-action="cancel" type="button" title="Close editor">Close</button>' +
+      '</div>';
+    this._lightbox.appendChild(this._editorOverlay);
+    var self = this;
+    Array.prototype.forEach.call(this._editorOverlay.querySelectorAll('button[data-action]'), function (btn) {
+      btn.addEventListener('click', function () {
+        self._editorAction(btn.getAttribute('data-action'));
+      });
+    });
+  };
+
+  NeikiGallery.prototype.openEditor = function () {
+    if (!this._editorOverlay) return;
+    this._editorState = { rotation: 0, flipH: false, flipV: false };
+    this._editorOverlay.classList.add('neiki-editor--visible');
+    this._lightbox.classList.add('neiki-lightbox--editor');
+    this._applyEditorTransform();
+    this._emit('editorOpen');
+  };
+
+  NeikiGallery.prototype.closeEditor = function () {
+    if (!this._editorOverlay) return;
+    this._editorOverlay.classList.remove('neiki-editor--visible');
+    this._lightbox.classList.remove('neiki-lightbox--editor');
+    this._editorState = null;
+    if (this._currentImg) this._currentImg.style.transform = '';
+    this._emit('editorClose');
+  };
+
+  NeikiGallery.prototype._editorAction = function (action) {
+    if (!this._editorState) return;
+    var s = this._editorState;
+    switch (action) {
+      case 'rotate-cw': s.rotation = (s.rotation + 90) % 360; break;
+      case 'rotate-ccw': s.rotation = (s.rotation - 90 + 360) % 360; break;
+      case 'flip-h': s.flipH = !s.flipH; break;
+      case 'flip-v': s.flipV = !s.flipV; break;
+      case 'reset': s.rotation = 0; s.flipH = false; s.flipV = false; break;
+      case 'cancel': this.closeEditor(); return;
+      case 'export': this._exportEditedImage(); return;
+    }
+    this._applyEditorTransform();
+  };
+
+  NeikiGallery.prototype._applyEditorTransform = function () {
+    if (!this._currentImg || !this._editorState) return;
+    var s = this._editorState;
+    var sx = s.flipH ? -1 : 1;
+    var sy = s.flipV ? -1 : 1;
+    this._currentImg.style.transform = 'rotate(' + s.rotation + 'deg) scale(' + sx + ',' + sy + ')';
+    this._currentImg.style.transition = 'transform 0.3s ease';
+  };
+
+  NeikiGallery.prototype._exportEditedImage = function () {
+    if (!this._currentImg || !this._editorState) return;
+    var img = this._currentImg;
+    var s = this._editorState;
+    var canvas = document.createElement('canvas');
+    var rotated = (s.rotation === 90 || s.rotation === 270);
+    canvas.width = rotated ? img.naturalHeight : img.naturalWidth;
+    canvas.height = rotated ? img.naturalWidth : img.naturalHeight;
+    var ctx = canvas.getContext('2d');
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate(s.rotation * Math.PI / 180);
+    ctx.scale(s.flipH ? -1 : 1, s.flipV ? -1 : 1);
+    try {
+      ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+      var self = this;
+      canvas.toBlob(function (blob) {
+        if (!blob) return;
+        self._lastEditedBlob = blob;
+        self._emit('editorExport', { blob: blob, url: URL.createObjectURL(blob) });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'edited-' + Date.now() + '.png';
+        a.click();
+      }, 'image/png');
+    } catch (e) {
+      this._showToast('Cannot export — image is cross-origin');
+    }
+  };
+
+  NeikiGallery.prototype.getEditedBlob = function () {
+    return this._lastEditedBlob || null;
+  };
+
+  /* ========================================================================
+     v3.0.0 — Annotation / Drawing Layer
+     ======================================================================== */
+
+  NeikiGallery.prototype._buildAnnotation = function () {
+    if (!this._options.annotate) return;
+    this._annotateOverlay = createElement('div', 'neiki-annotate');
+    this._annotateOverlay.innerHTML =
+      '<canvas class="neiki-annotate__canvas"></canvas>' +
+      '<div class="neiki-annotate__toolbar">' +
+      '<input class="neiki-annotate__color" type="color" value="#ff3b30" aria-label="Stroke color">' +
+      '<input class="neiki-annotate__size" type="range" min="1" max="20" value="4" aria-label="Brush size">' +
+      '<button class="neiki-annotate__btn" data-action="undo" type="button" title="Undo">↶</button>' +
+      '<button class="neiki-annotate__btn" data-action="clear" type="button" title="Clear">Clear</button>' +
+      '<button class="neiki-annotate__btn neiki-annotate__btn--primary" data-action="export" type="button" title="Export">Export</button>' +
+      '<button class="neiki-annotate__btn" data-action="cancel" type="button" title="Close">Close</button>' +
+      '</div>';
+    this._lightbox.appendChild(this._annotateOverlay);
+    this._annotateCanvas = this._annotateOverlay.querySelector('.neiki-annotate__canvas');
+    this._annotateCtx = this._annotateCanvas.getContext('2d');
+    this._annotateStrokes = [];
+
+    var self = this;
+    Array.prototype.forEach.call(this._annotateOverlay.querySelectorAll('button[data-action]'), function (btn) {
+      btn.addEventListener('click', function () {
+        self._annotateAction(btn.getAttribute('data-action'));
+      });
+    });
+    this._annotateOverlay.querySelector('.neiki-annotate__color').addEventListener('input', function (e) {
+      self._annotateColor = e.target.value;
+    });
+    this._annotateOverlay.querySelector('.neiki-annotate__size').addEventListener('input', function (e) {
+      self._annotateSize = parseInt(e.target.value, 10);
+    });
+    this._annotateColor = '#ff3b30';
+    this._annotateSize = 4;
+
+    this._bindAnnotateDrawing();
+  };
+
+  NeikiGallery.prototype._bindAnnotateDrawing = function () {
+    var self = this;
+    var canvas = this._annotateCanvas;
+    var drawing = false;
+    var current = null;
+
+    function pos(e) {
+      var rect = canvas.getBoundingClientRect();
+      var p = e.touches ? e.touches[0] : e;
+      return { x: (p.clientX - rect.left) * (canvas.width / rect.width),
+               y: (p.clientY - rect.top) * (canvas.height / rect.height) };
+    }
+    function start(e) {
+      e.preventDefault();
+      drawing = true;
+      var p = pos(e);
+      current = { color: self._annotateColor, size: self._annotateSize, points: [p] };
+    }
+    function move(e) {
+      if (!drawing) return;
+      e.preventDefault();
+      var p = pos(e);
+      current.points.push(p);
+      self._redrawAnnotations(current);
+    }
+    function end() {
+      if (!drawing) return;
+      drawing = false;
+      if (current && current.points.length > 1) self._annotateStrokes.push(current);
+      current = null;
+    }
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', end);
+    canvas.addEventListener('touchstart', start, { passive: false });
+    canvas.addEventListener('touchmove', move, { passive: false });
+    canvas.addEventListener('touchend', end);
+  };
+
+  NeikiGallery.prototype._redrawAnnotations = function (currentStroke) {
+    var ctx = this._annotateCtx;
+    var canvas = this._annotateCanvas;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var all = this._annotateStrokes.slice();
+    if (currentStroke) all.push(currentStroke);
+    all.forEach(function (stroke) {
+      if (!stroke.points.length) return;
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.size;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+      for (var i = 1; i < stroke.points.length; i++) {
+        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+      }
+      ctx.stroke();
+    });
+  };
+
+  NeikiGallery.prototype.openAnnotate = function () {
+    if (!this._annotateOverlay || !this._currentImg) return;
+    this._annotateCanvas.width = this._currentImg.naturalWidth || 1024;
+    this._annotateCanvas.height = this._currentImg.naturalHeight || 768;
+    this._annotateStrokes = [];
+    this._redrawAnnotations();
+    this._annotateOverlay.classList.add('neiki-annotate--visible');
+    this._lightbox.classList.add('neiki-lightbox--annotate');
+    this._emit('annotateOpen');
+  };
+
+  NeikiGallery.prototype.closeAnnotate = function () {
+    if (!this._annotateOverlay) return;
+    this._annotateOverlay.classList.remove('neiki-annotate--visible');
+    this._lightbox.classList.remove('neiki-lightbox--annotate');
+    this._emit('annotateClose');
+  };
+
+  NeikiGallery.prototype._annotateAction = function (action) {
+    switch (action) {
+      case 'undo':
+        this._annotateStrokes.pop();
+        this._redrawAnnotations();
+        break;
+      case 'clear':
+        this._annotateStrokes = [];
+        this._redrawAnnotations();
+        break;
+      case 'cancel':
+        this.closeAnnotate();
+        break;
+      case 'export':
+        this._exportAnnotation();
+        break;
+    }
+  };
+
+  NeikiGallery.prototype._exportAnnotation = function () {
+    if (!this._currentImg) return;
+    var canvas = document.createElement('canvas');
+    canvas.width = this._currentImg.naturalWidth;
+    canvas.height = this._currentImg.naturalHeight;
+    var ctx = canvas.getContext('2d');
+    try {
+      ctx.drawImage(this._currentImg, 0, 0);
+      ctx.drawImage(this._annotateCanvas, 0, 0);
+      var self = this;
+      canvas.toBlob(function (blob) {
+        if (!blob) return;
+        self._lastAnnotatedBlob = blob;
+        self._emit('annotateExport', { blob: blob, url: URL.createObjectURL(blob) });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'annotated-' + Date.now() + '.png';
+        a.click();
+      }, 'image/png');
+    } catch (e) {
+      this._showToast('Cannot export — image is cross-origin');
+    }
+  };
+
+  NeikiGallery.prototype.getAnnotatedBlob = function () {
+    return this._lastAnnotatedBlob || null;
+  };
+
+  /* ========================================================================
+     v3.0.0 — Kenburns Slideshow Effect
+     ======================================================================== */
+
+  NeikiGallery.prototype._applyKenburns = function () {
+    if (!this._slideshowRunning) return;
+    var slideshowOpts = this._options.slideshow;
+    if (typeof slideshowOpts !== 'object' || !slideshowOpts.kenburns) return;
+    if (!this._currentImg) return;
+    this._currentImg.classList.add('neiki-kenburns');
+    var dur = (this._options.slideshow.interval || 4000) + 'ms';
+    this._currentImg.style.setProperty('--neiki-kenburns-duration', dur);
+  };
+
+  NeikiGallery.prototype._removeKenburns = function () {
+    if (this._currentImg) {
+      this._currentImg.classList.remove('neiki-kenburns');
+      this._currentImg.style.removeProperty('--neiki-kenburns-duration');
+    }
+  };
+
+  NeikiGallery.prototype._setupSlideshowPauseOnHover = function () {
+    var slideshowOpts = this._options.slideshow;
+    if (typeof slideshowOpts !== 'object' || !slideshowOpts.pauseOnHover) return;
+    var self = this;
+    if (!this._lightbox) return;
+    this._lightbox.addEventListener('mouseenter', function () {
+      if (self._slideshowRunning) {
+        self._slideshowPausedByHover = true;
+        self.pauseSlideshow();
+      }
+    });
+    this._lightbox.addEventListener('mouseleave', function () {
+      if (self._slideshowPausedByHover) {
+        self._slideshowPausedByHover = false;
+        self.startSlideshow();
+      }
+    });
+  };
+
+  /* ========================================================================
      Auto-Init
      ======================================================================== */
 
@@ -2187,6 +3576,11 @@
   NeikiGallery.extractDominantColor = extractDominantColor;
   NeikiGallery.parseExif = parseExif;
   NeikiGallery.decodeBlurhash = decodeBlurhash;
+
+  // Static utilities (v3.0.0)
+  // NeikiGallery.detectMediaType, registerPlugin, unregisterPlugin, getRegisteredPlugins
+  // are exposed inside the v3 module sections above.
+  NeikiGallery.version = '3.0.0';
 
   return NeikiGallery;
 });
