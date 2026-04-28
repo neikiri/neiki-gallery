@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/css-%23663399.svg?style=for-the-badge&logo=css&logoColor=white" alt="CSS">
   <br>
   <img src="https://img.shields.io/badge/License-MIT-2563EB?style=for-the-badge&logo=open-source-initiative&logoColor=white&labelColor=000F15&logoWidth=20" alt="License">
-  <img src="https://img.shields.io/badge/Version-2.0.0-2563EB?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=000F15&logoWidth=20" alt="Version">
+  <img src="https://img.shields.io/badge/Version-2.1.0-2563EB?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=000F15&logoWidth=20" alt="Version">
 </p>
 
 <p align="center">
@@ -56,17 +56,28 @@
 - **Dark & light themes** — CSS custom properties + accent color system (`--neiki-accent`)
 - **Accessibility** — ARIA attributes, focus management, `prefers-reduced-motion`
 - **Event system** — `open`, `close`, `change`, `filter`, `select`, `slideshowStart`, `slideshowStop`
+- **Blurhash placeholders** — `data-blurhash` attribute decoded into blurred preview (replaces shimmer)
+- **Story mode** — Instagram-like vertical fullscreen viewer with progress bars and tap navigation
+- **Picture-in-Picture** — minimize lightbox to a resizable corner window
+- **Image focus point** — `data-focus="0.3 0.7"` controls `object-position` for smart cropping
+- **EXIF overlay** — camera model, focal length, aperture, shutter speed, ISO from JPEG binary
+- **Color palette extraction** — k-means quantized 5-color palette strip in lightbox
+- **Backdrop tint** — overlay adapts to dominant color of current image
+- **FLIP morph transition** — smooth thumbnail-to-lightbox animation
+- **Virtual scrolling** — `content-visibility` virtualization for large galleries (50+ items)
+- **Drag & drop reorder** — HTML5 drag to reorder grid items
+- **Aspect-ratio skeleton** — `data-width`/`data-height` for placeholder sizing
+- **Web Share API** — native mobile sharing with clipboard fallback
 - **Cross-browser** — Chrome 60+, Firefox 55+, Safari 12+, Edge 79+
 
 ## 🚀 Quick Start
 
 ### CDN (Recommended)
 
-Add these two lines to your HTML — that's all you need:
+Add this single line to your HTML — that's all you need (CSS is included automatically):
 
 ```html
-<link rel="stylesheet" href="http://cdn.neiki.eu/neiki-gallery/neiki-gallery.min.css">
-<script src="http://cdn.neiki.eu/neiki-gallery/neiki-gallery.min.js"></script>
+<script src="https://cdn.neiki.eu/neiki-gallery/neiki-gallery.min.js"></script>
 ```
 
 Then create your gallery markup:
@@ -84,16 +95,15 @@ Then create your gallery markup:
 
 That's it — galleries with `data-neiki-gallery` auto-initialize on page load.
 
-> **Unminified files** are also available if you need them for debugging:
+> **Unminified files** are also available if you need them for debugging (require separate CSS):
 > ```
-> http://cdn.neiki.eu/neiki-gallery/neiki-gallery.js
-> http://cdn.neiki.eu/neiki-gallery/neiki-gallery.css
+> https://cdn.neiki.eu/neiki-gallery/neiki-gallery.js
+> https://cdn.neiki.eu/neiki-gallery/neiki-gallery.css
 > ```
 
 > **Pin a specific version** to avoid unexpected changes:
 > ```
-> http://cdn.neiki.eu/neiki-gallery/2.0.0/neiki-gallery.min.js
-> http://cdn.neiki.eu/neiki-gallery/2.0.0/neiki-gallery.min.css
+> https://cdn.neiki.eu/neiki-gallery/2.1.0/neiki-gallery.min.js
 > ```
 
 ### Self-Hosting (Local)
@@ -104,20 +114,26 @@ Download or clone the repository from GitHub:
 git clone https://github.com/neikiri/neiki-gallery.git
 ```
 
-Copy the files from the `dist/` folder into your project and link them directly:
+For production, you only need one file — CSS is already included:
 
 ```html
-<link rel="stylesheet" href="path/to/neiki-gallery.min.css">
 <script src="path/to/neiki-gallery.min.js"></script>
 ```
 
-The `dist/` folder contains both minified and unminified versions:
+For development / debugging, use the unminified versions (requires separate CSS):
+
+```html
+<link rel="stylesheet" href="path/to/neiki-gallery.css">
+<script src="path/to/neiki-gallery.js"></script>
+```
+
+The `dist/` folder contains:
 
 | File | Description |
 |------|-------------|
-| `neiki-gallery.min.js` | Minified JS (production) |
-| `neiki-gallery.min.css` | Minified CSS (production) |
-| `neiki-gallery.js` | Full JS (development / debugging) |
+| `neiki-gallery.min.js` | Minified JS + CSS included (production) |
+| `neiki-gallery.min.css` | Minified CSS standalone (optional) |
+| `neiki-gallery.js` | Full JS without CSS (development / debugging) |
 | `neiki-gallery.css` | Full CSS (development / debugging) |
 
 ### Manual Initialization
@@ -139,6 +155,18 @@ const gallery = new NeikiGallery('#my-gallery', {
   share: true,             // share/download popup
   filter: false,           // tag filtering
   batchSelect: false,      // Shift+click multi-select
+  // v2.1.0
+  focusPoint: true,        // respect data-focus for object-position
+  blurhash: true,          // decode data-blurhash placeholders
+  exif: false,             // show EXIF overlay in lightbox
+  storyMode: false,        // vertical fullscreen story viewer
+  pip: false,              // picture-in-picture lightbox
+  virtualScroll: false,    // virtualize grid for large galleries
+  dragReorder: false,      // drag-and-drop reorder
+  backdropTint: false,     // tint overlay with dominant color
+  morphTransition: false,  // FLIP morph from grid to lightbox
+  colorPalette: false,     // extract dominant colors
+  aspectSkeleton: true,    // data-width/data-height skeleton
 });
 ```
 
@@ -157,6 +185,7 @@ gallery.toggleSlideshow();    // Toggle autoplay
 gallery.filter('landscape');  // Filter by tag (null = show all)
 gallery.getSelected();        // Get batch-selected items
 gallery.clearSelection();     // Clear batch selection
+gallery.getOrder();           // Get current item order (after drag reorder)
 gallery.destroy();            // Remove gallery, clean up all listeners & DOM
 ```
 
@@ -174,6 +203,24 @@ const slider = NeikiGallery.compare('#compare-container', {
 
 slider.setPosition(30);  // Move handle to 30%
 slider.destroy();        // Clean up
+
+// Color palette extraction (v2.1.0)
+NeikiGallery.extractPalette('photo.jpg', 5, (colors) => {
+  console.log(colors); // [{r, g, b, hex}, ...]
+});
+
+// Dominant color (v2.1.0)
+NeikiGallery.extractDominantColor('photo.jpg', (color) => {
+  console.log(color); // {r, g, b, hex}
+});
+
+// EXIF parsing (v2.1.0)
+NeikiGallery.parseExif('photo.jpg', (tags) => {
+  console.log(tags); // {make, model, iso, fNumber, exposure, focalLength}
+});
+
+// Blurhash decoding (v2.1.0)
+const pixels = NeikiGallery.decodeBlurhash('LEHV6nWB2y...', 32, 32);
 ```
 
 ### Events
@@ -202,6 +249,13 @@ gallery.on('select', (indices) => {
 gallery.on('slideshowStart', () => {
   console.log('Slideshow started');
 });
+
+gallery.on('reorder', (order) => {
+  console.log('New order:', order);
+});
+
+gallery.on('pipEnter', () => console.log('PiP on'));
+gallery.on('storyEnter', () => console.log('Story opened'));
 ```
 
 ### Options
@@ -227,6 +281,17 @@ gallery.on('slideshowStart', () => {
 | `share` | `boolean` | `true` | Show share button in lightbox |
 | `filter` | `boolean` | `false` | Enable tag filtering bar |
 | `batchSelect` | `boolean` | `false` | Enable Shift+click multi-select |
+| `focusPoint` | `boolean` | `true` | Respect `data-focus` for `object-position` |
+| `blurhash` | `boolean` | `true` | Decode `data-blurhash` placeholders |
+| `exif` | `boolean` | `false` | Show EXIF data overlay in lightbox |
+| `storyMode` | `boolean` | `false` | Enable story mode button in toolbar |
+| `pip` | `boolean` | `false` | Enable PiP button in toolbar |
+| `virtualScroll` | `boolean` | `false` | Virtualize grid for 50+ items |
+| `dragReorder` | `boolean` | `false` | Enable drag & drop reorder |
+| `backdropTint` | `boolean` | `false` | Tint overlay with dominant color |
+| `morphTransition` | `boolean` | `false` | FLIP morph from grid to lightbox |
+| `colorPalette` | `boolean` | `false` | Show extracted color palette |
+| `aspectSkeleton` | `boolean` | `true` | Use `data-width`/`data-height` for skeleton |
 
 ### Data Attributes
 
@@ -244,9 +309,18 @@ All options can also be set via `data-` attributes on the container:
      data-share="true"
      data-filter="true"
      data-batch-select="false"
-     data-contextual-zoom="true">
-  <a href="full.jpg" data-tags="landscape,nature" data-size="large">
-    <img src="thumb.jpg" alt="Photo">
+     data-contextual-zoom="true"
+     data-story-mode="false"
+     data-pip="false"
+     data-exif="false"
+     data-backdrop-tint="false"
+     data-morph-transition="false"
+     data-color-palette="false"
+     data-drag-reorder="false"
+     data-virtual-scroll="false"
+     data-aspect-skeleton="true">
+  <a href="full.jpg" data-tags="landscape,nature" data-size="large" data-width="1200" data-height="800">
+    <img src="thumb.jpg" alt="Photo" data-focus="0.5 0.3" data-blurhash="LEHV6nWB2y...">
   </a>
 </div>
 ```

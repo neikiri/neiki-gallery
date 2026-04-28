@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] — 2026-04-28
+
+### Added
+
+- **Blurhash placeholders** — decode `data-blurhash` attribute into blurred preview image while loading (replaces shimmer)
+- **Story mode** — Instagram-like vertical fullscreen viewer with auto-advance progress bars and tap navigation (`storyMode` option)
+- **Picture-in-Picture (PiP) lightbox** — minimize lightbox to a resizable corner window while scrolling the page (`pip` option)
+- **Image focus point** — `data-focus="0.3 0.7"` on images controls `object-position` for smart cropping in grid layouts (`focusPoint` option)
+- **EXIF overlay** — reads camera model, focal length, aperture, shutter speed, and ISO from JPEG binary in lightbox (`exif` option)
+- **Color palette extraction** — k-means quantized 5-color palette strip displayed in lightbox (`colorPalette` option)
+- **Backdrop tint** — lightbox overlay adapts to dominant color of current image (`backdropTint` option)
+- **FLIP morph transition** — smooth thumbnail-to-lightbox animation using FLIP pattern (`morphTransition` option)
+- **Virtual scrolling** — `content-visibility` based virtualization for galleries with 50+ items (`virtualScroll` option)
+- **Drag & drop reorder** — native HTML5 drag to reorder grid items, `getOrder()` API method (`dragReorder` option)
+- **Aspect-ratio skeleton** — `data-width` / `data-height` attributes set skeleton placeholder aspect ratio (`aspectSkeleton` option)
+- **Web Share API** — share button now uses native `navigator.share()` with clipboard copy fallback
+- New events: `reorder`, `pipEnter`, `pipExit`, `storyEnter`, `storyExit`
+- New API method: `getOrder()` — returns current item order after drag reorder
+- New static utilities: `NeikiGallery.extractPalette()`, `NeikiGallery.extractDominantColor()`, `NeikiGallery.parseExif()`, `NeikiGallery.decodeBlurhash()`
+- New data attributes: `data-focus`, `data-blurhash`, `data-width`, `data-height`, `data-focus-point`, `data-exif`, `data-story-mode`, `data-pip`, `data-virtual-scroll`, `data-drag-reorder`, `data-backdrop-tint`, `data-morph-transition`, `data-color-palette`, `data-aspect-skeleton`
+- New CSS sections: PiP lightbox, Story mode, EXIF overlay, Color palette strip, Drag & drop, Virtual scroll, Backdrop tint
+- Demo page expanded with 3 new sections (Story/PiP, Drag & Drop, Focus Point)
+
+### Changed
+
+- **Single-file distribution** — `neiki-gallery.min.js` now includes all CSS auto-injected into `<head>`, so users only need one `<script>` tag (separate CSS files still available)
+- Share popup now tries `navigator.share()` first (mobile-native sharing) before falling back to clipboard copy
+- Clipboard copy extracted to reusable `_copyToClipboard()` internal method
+- Empty CSS ruleset for `.neiki-progress--paused` replaced with `transition: none` (fixes lint warning)
+
 ## [2.0.0] — 2026-04-28
 
 ### Added

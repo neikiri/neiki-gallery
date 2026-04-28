@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Neiki Gallery v2.0.0 — CSS
+   Neiki Gallery v2.1.0 — CSS
    A vanilla JS image gallery/lightbox library.
    https://github.com/neikiri/neiki-gallery
 
@@ -846,7 +846,7 @@
 }
 
 .neiki-lightbox__progress.neiki-progress--paused {
-  /* Keeps current width, no transition */
+  transition: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -1095,7 +1095,310 @@
 }
 
 /* --------------------------------------------------------------------------
-   24. Accessibility — Focus & Reduced Motion
+   24. Picture-in-Picture (PiP) Lightbox (v2.1.0)
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox--pip {
+  inset: auto;
+  top: auto;
+  left: auto;
+  right: 20px;
+  bottom: 20px;
+  width: 360px;
+  height: 280px;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  resize: both;
+  overflow: hidden;
+  z-index: 999998;
+}
+
+.neiki-lightbox--pip .neiki-lightbox__thumbs,
+.neiki-lightbox--pip .neiki-lightbox__caption,
+.neiki-lightbox--pip .neiki-lightbox__topbar,
+.neiki-lightbox--pip .neiki-exif,
+.neiki-lightbox--pip .neiki-palette {
+  display: none;
+}
+
+.neiki-lightbox--pip .neiki-lightbox__toolbar {
+  top: 8px;
+  right: 8px;
+  padding: 2px;
+  border-radius: 10px;
+}
+
+.neiki-lightbox--pip .neiki-lightbox__toolbar .neiki-lightbox__btn {
+  width: 28px;
+  height: 28px;
+}
+
+.neiki-lightbox--pip .neiki-lightbox__toolbar .neiki-lightbox__btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.neiki-lightbox--pip .neiki-lightbox__prev,
+.neiki-lightbox--pip .neiki-lightbox__next {
+  width: 28px;
+  height: 28px;
+}
+
+.neiki-lightbox--pip .neiki-lightbox__prev svg,
+.neiki-lightbox--pip .neiki-lightbox__next svg {
+  width: 14px;
+  height: 14px;
+}
+
+.neiki-lightbox--pip .neiki-lightbox__image {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 0;
+}
+
+/* --------------------------------------------------------------------------
+   25. Story Mode (v2.1.0)
+   -------------------------------------------------------------------------- */
+
+.neiki-story {
+  position: fixed;
+  inset: 0;
+  z-index: 9999999;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: var(--neiki-font);
+}
+
+.neiki-story__slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.neiki-story__slide--active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.neiki-story__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  -webkit-user-drag: none;
+}
+
+.neiki-story__caption {
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #fff;
+  font-size: 15px;
+  padding: 8px 20px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.neiki-story__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+.neiki-story__close svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.neiki-story__close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.neiki-story__progress-wrap {
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.neiki-story__progress-bar {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.neiki-story__progress-fill {
+  width: 0%;
+  height: 100%;
+  background: #fff;
+  border-radius: 3px;
+  transition: none;
+}
+
+/* --------------------------------------------------------------------------
+   26. EXIF Overlay (v2.1.0)
+   -------------------------------------------------------------------------- */
+
+.neiki-exif {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  background: rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  font-family: var(--neiki-font);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.neiki-exif--visible {
+  opacity: 1;
+}
+
+[data-theme="light"] .neiki-exif {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   28. Color Palette Strip (v2.1.0)
+   -------------------------------------------------------------------------- */
+
+.neiki-palette {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.neiki-palette--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.neiki-palette__dot {
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.neiki-palette__dot:hover {
+  transform: scale(1.3);
+}
+
+/* --------------------------------------------------------------------------
+   29. Drag & Drop Reorder (v2.1.0)
+   -------------------------------------------------------------------------- */
+
+.neiki-draggable {
+  cursor: grab;
+}
+
+.neiki-draggable:active {
+  cursor: grabbing;
+}
+
+.neiki-dragging {
+  opacity: 0.4;
+  transform: scale(0.96);
+}
+
+.neiki-drag-over {
+  outline: 2px dashed var(--neiki-accent);
+  outline-offset: -2px;
+}
+
+/* --------------------------------------------------------------------------
+   30. Virtual Scroll (v2.1.0)
+   -------------------------------------------------------------------------- */
+
+.neiki-virtual-hidden {
+  content-visibility: hidden;
+  contain-intrinsic-size: auto 300px;
+}
+
+/* --------------------------------------------------------------------------
+   31. Backdrop Tint (v2.1.0)
+   -------------------------------------------------------------------------- */
+
+.neiki-lightbox--tinted {
+  background: rgba(
+    var(--neiki-tint-r, 8),
+    var(--neiki-tint-g, 8),
+    var(--neiki-tint-b, 12),
+    0.82
+  );
+  transition: background 0.6s ease;
+}
+
+/* --------------------------------------------------------------------------
+   32. Accessibility — Focus & Reduced Motion
    -------------------------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Neiki Gallery — Demo</title>
-  <link rel="stylesheet" href="http://cdn.neiki.eu/neiki-gallery/neiki-gallery.css">
   <style>
     /* ---------- Demo page styles ---------- */
     *,
@@ -268,6 +267,17 @@
       <span class="tag">Lazy Loading</span>
       <span class="tag">Deep Linking</span>
       <span class="tag">Theming</span>
+      <span class="tag">Story Mode</span>
+      <span class="tag">Picture-in-Picture</span>
+      <span class="tag">EXIF Overlay</span>
+      <span class="tag">Color Palette</span>
+      <span class="tag">Blurhash</span>
+      <span class="tag">Focus Point</span>
+      <span class="tag">Backdrop Tint</span>
+      <span class="tag">Drag & Drop</span>
+      <span class="tag">FLIP Morph</span>
+      <span class="tag">Virtual Scroll</span>
+      <span class="tag">Web Share API</span>
       <span class="tag">0 Dependencies</span>
     </div>
   </header>
@@ -279,7 +289,7 @@
     <h2>1. Masonry Layout — Dark Theme (Auto-init)</h2>
     <p class="desc">Uses <code>data-neiki-gallery</code> for zero-JS initialization. Masonry layout with dark theme, fade transition.</p>
 
-    <div data-neiki-gallery data-layout="masonry" data-theme="dark" data-transition="fade" id="gallery-masonry">
+    <div data-neiki-gallery data-layout="masonry" data-theme="dark" data-transition="fade" data-morph-transition="true" id="gallery-masonry">
       <a href="https://picsum.photos/id/10/1200/800" data-caption="Lush forest trail">
         <img src="https://picsum.photos/id/10/400/267" alt="Forest trail">
       </a>
@@ -326,7 +336,7 @@
     <h2>2. Mosaic Layout — Tag Filtering</h2>
     <p class="desc">Mosaic layout with <code>data-size</code> tiles and automatic tag filtering from <code>data-tags</code>.</p>
 
-    <div data-neiki-gallery data-layout="mosaic" data-theme="dark" data-filter="true" id="gallery-mosaic">
+    <div data-neiki-gallery data-layout="mosaic" data-theme="dark" data-filter="true" data-backdrop-tint="true" data-color-palette="true" id="gallery-mosaic">
       <a href="https://picsum.photos/id/24/1200/800" data-caption="Calm ocean" data-tags="nature,water" data-size="large">
         <img src="https://picsum.photos/id/24/600/400" alt="Ocean">
       </a>
@@ -441,16 +451,97 @@
   </div>
 
   <!-- ================================================================
+       6. Story Mode + PiP Demo
+       ================================================================ -->
+  <div class="section">
+    <h2>6. Story Mode + Picture-in-Picture</h2>
+    <p class="desc">Gallery with story mode (Instagram-like vertical viewer) and PiP (minimize lightbox to corner). Click the phone/PiP icons in the toolbar.</p>
+
+    <div data-neiki-gallery data-layout="grid" data-theme="dark" data-story-mode="true" data-pip="true" data-exif="true" id="gallery-story">
+      <a href="https://picsum.photos/id/50/1200/800" data-caption="Sunset coast">
+        <img src="https://picsum.photos/id/50/400/267" alt="Sunset coast">
+      </a>
+      <a href="https://picsum.photos/id/51/1200/800" data-caption="Mountain stream">
+        <img src="https://picsum.photos/id/51/400/267" alt="Mountain stream">
+      </a>
+      <a href="https://picsum.photos/id/52/1200/800" data-caption="Cloudy peaks">
+        <img src="https://picsum.photos/id/52/400/267" alt="Cloudy peaks">
+      </a>
+      <a href="https://picsum.photos/id/53/1200/800" data-caption="Morning dew">
+        <img src="https://picsum.photos/id/53/400/267" alt="Morning dew">
+      </a>
+      <a href="https://picsum.photos/id/54/1200/800" data-caption="Ancient ruins">
+        <img src="https://picsum.photos/id/54/400/267" alt="Ancient ruins">
+      </a>
+      <a href="https://picsum.photos/id/55/1200/800" data-caption="Forest path">
+        <img src="https://picsum.photos/id/55/400/267" alt="Forest path">
+      </a>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       7. Drag & Drop Reorder
+       ================================================================ -->
+  <div class="section">
+    <h2>7. Drag & Drop Reorder</h2>
+    <p class="desc">Drag items to reorder them. Uses native HTML5 drag & drop. Get order via <code>gallery.getOrder()</code>.</p>
+
+    <div data-neiki-gallery data-layout="grid" data-theme="dark" data-drag-reorder="true" id="gallery-drag">
+      <a href="https://picsum.photos/id/60/1200/800" data-caption="Image 1">
+        <img src="https://picsum.photos/id/60/400/267" alt="Image 1">
+      </a>
+      <a href="https://picsum.photos/id/61/1200/800" data-caption="Image 2">
+        <img src="https://picsum.photos/id/61/400/267" alt="Image 2">
+      </a>
+      <a href="https://picsum.photos/id/62/1200/800" data-caption="Image 3">
+        <img src="https://picsum.photos/id/62/400/267" alt="Image 3">
+      </a>
+      <a href="https://picsum.photos/id/63/1200/800" data-caption="Image 4">
+        <img src="https://picsum.photos/id/63/400/267" alt="Image 4">
+      </a>
+      <a href="https://picsum.photos/id/64/1200/800" data-caption="Image 5">
+        <img src="https://picsum.photos/id/64/400/267" alt="Image 5">
+      </a>
+      <a href="https://picsum.photos/id/65/1200/800" data-caption="Image 6">
+        <img src="https://picsum.photos/id/65/400/267" alt="Image 6">
+      </a>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       8. Focus Point Demo
+       ================================================================ -->
+  <div class="section">
+    <h2>8. Focus Point + Aspect Skeleton</h2>
+    <p class="desc">Images with <code>data-focus="x y"</code> for smart cropping and <code>data-width/data-height</code> for skeleton aspect ratio.</p>
+
+    <div data-neiki-gallery data-layout="grid" data-theme="dark" id="gallery-focus">
+      <a href="https://picsum.photos/id/70/1200/800" data-caption="Center focus" data-width="1200" data-height="800">
+        <img src="https://picsum.photos/id/70/400/267" alt="Center" data-focus="0.5 0.5">
+      </a>
+      <a href="https://picsum.photos/id/71/1200/800" data-caption="Top-left focus" data-width="1200" data-height="800">
+        <img src="https://picsum.photos/id/71/400/267" alt="Top-left" data-focus="0.2 0.2">
+      </a>
+      <a href="https://picsum.photos/id/72/1200/800" data-caption="Bottom-right focus" data-width="1200" data-height="800">
+        <img src="https://picsum.photos/id/72/400/267" alt="Bottom-right" data-focus="0.8 0.8">
+      </a>
+      <a href="https://picsum.photos/id/73/1200/800" data-caption="Left center" data-width="1200" data-height="800">
+        <img src="https://picsum.photos/id/73/400/267" alt="Left center" data-focus="0.1 0.5">
+      </a>
+    </div>
+  </div>
+
+  <!-- ================================================================
        Footer
        ================================================================ -->
   <footer class="footer">
-    <p>Neiki Gallery v2.0.0 &middot; Vanilla JS &middot; Zero Dependencies</p>
+    <p>Neiki Gallery v2.1.0 &middot; Vanilla JS &middot; Zero Dependencies</p>
   </footer>
 
   <!-- ================================================================
        Scripts
        ================================================================ -->
-  <script src="http://cdn.neiki.eu/neiki-gallery/neiki-gallery.min.js"></script>
+  <script src="https://cdn.neiki.eu/neiki-gallery/neiki-gallery.min.js"></script>
   <script>
     // Comparison slider
     NeikiGallery.compare('#compare-demo', {
