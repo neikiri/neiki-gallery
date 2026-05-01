@@ -1,8 +1,8 @@
-<h1 align="center">Neiki Gallery</h1>
-
 <p align="center">
-  <img src="logo.png" alt="neiki-gallery" width="400">
+  <img src="logo.png" alt="Neiki's Gallery" width="400">
 </p>
+
+<h1 align="center">Neiki's Gallery</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E" alt="JavaScript">
@@ -27,9 +27,17 @@
 
 ---
 
+<img src="preview.png" width="900px">
+
+---
+
+**Live version:** [https://neiki.eu/polyglot-formatter](https://neiki.eu/polyglot-formatter)
+
+---
+
 ## 📖 About
 
-**Neiki Gallery** is a production-ready image gallery and lightbox library built with vanilla JavaScript and CSS. No frameworks, no dependencies — just drop two files into your project and you're ready to go.
+**Neiki's Gallery** is a production-ready image gallery and lightbox library built with vanilla JavaScript and CSS. No frameworks, no dependencies — just drop two files into your project and you're ready to go.
 
 ## ✨ Features
 
@@ -477,7 +485,7 @@ All options can also be set via `data-` attributes on the container:
 
 ## 🎨 Theming
 
-Neiki Gallery uses CSS custom properties for full theming control:
+Neiki's Gallery uses CSS custom properties for full theming control:
 
 ```css
 :root {

@@ -13,7 +13,7 @@ Only the latest release is actively supported with security updates.
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in Neiki Gallery, **please do not open a public issue.**
+If you discover a security vulnerability in Neiki's Gallery, **please do not open a public issue.**
 
 Instead, report it privately via email:
 
@@ -34,7 +34,7 @@ Instead, report it privately via email:
 
 ## Scope
 
-This policy covers the Neiki Gallery library code (`neiki-gallery.js` and `neiki-gallery.css`), including:
+This policy covers the Neiki's Gallery library code (`neiki-gallery.js` and `neiki-gallery.css`), including:
 
 - Cross-site scripting (XSS) via captions, attributes, or injected markup
 - DOM manipulation vulnerabilities
@@ -54,4 +54,4 @@ We kindly ask that you:
 2. Do not exploit the vulnerability beyond what is necessary to demonstrate it
 3. Do not access or modify data belonging to other users
 
-We appreciate your help in keeping Neiki Gallery and its users safe.
+We appreciate your help in keeping Neiki's Gallery and its users safe.

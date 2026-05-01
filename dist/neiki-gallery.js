@@ -1,5 +1,5 @@
 /*!
- * Neiki Gallery v3.0.0
+ * Neiki's Gallery v3.0.0
  * A vanilla JavaScript image gallery / lightbox library.
  * No dependencies. No frameworks.
  *

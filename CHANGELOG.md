@@ -142,7 +142,7 @@ If you depend on the old hash format, set `hashNavigation: false` and implement 
 
 ### Added
 
-- Initial release of Neiki Gallery
+- Initial release of Neiki's Gallery
 - Responsive masonry layout (CSS columns)
 - Uniform grid layout (CSS Grid)
 - Lightbox with fade and slide transitions
