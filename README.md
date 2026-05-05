@@ -31,7 +31,7 @@
 
 ---
 
-**Live version:** [https://neiki.eu/polyglot-formatter](https://neiki.eu/polyglot-formatter)
+**Live demo:** [https://neiki.eu/gallery](https://neiki.eu/gallery)
 
 ---
 
