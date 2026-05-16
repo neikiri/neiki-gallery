@@ -17,7 +17,7 @@ If you discover a security vulnerability in Neiki's Gallery, **please do not ope
 
 Instead, report it privately via email:
 
-**📧 [dev@neiki.eu](mailto:dev@neiki.eu)**
+**📧 [neikiri@neikiri.dev](mailto:neikiri@neikiri.dev)**
 
 ### What to include
 

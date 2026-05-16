@@ -31,7 +31,7 @@
 
 ---
 
-**Live demo:** [https://neiki.eu/gallery](https://neiki.eu/gallery)
+**Live demo:** [https://neikiri.dev/gallery](https://neikiri.dev/gallery)
 
 ---
 
@@ -99,7 +99,7 @@
 Add this single line to your HTML — that's all you need (CSS is included automatically):
 
 ```html
-<script src="https://cdn.neiki.eu/neiki-gallery/neiki-gallery.min.js"></script>
+<script src="https://cdn.neikiri.dev/neiki-gallery/neiki-gallery.min.js"></script>
 ```
 
 Then create your gallery markup:
@@ -119,13 +119,13 @@ That's it — galleries with `data-neiki-gallery` auto-initialize on page load.
 
 > **Unminified files** are also available if you need them for debugging (require separate CSS):
 > ```
-> https://cdn.neiki.eu/neiki-gallery/neiki-gallery.js
-> https://cdn.neiki.eu/neiki-gallery/neiki-gallery.css
+> https://cdn.neikiri.dev/neiki-gallery/neiki-gallery.js
+> https://cdn.neikiri.dev/neiki-gallery/neiki-gallery.css
 > ```
 
 > **Pin a specific version** to avoid unexpected changes:
 > ```
-> https://cdn.neiki.eu/neiki-gallery/3.0.0/neiki-gallery.min.js
+> https://cdn.neikiri.dev/neiki-gallery/3.0.0/neiki-gallery.min.js
 > ```
 
 ### Self-Hosting (Local)
@@ -575,7 +575,7 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE) fi
 
 ## 📬 Contact
 
-- **Email:** [dev@neiki.eu](mailto:dev@neiki.eu)
+- **Email:** [neikiri@neikiri.dev](mailto:neikiri@neikiri.dev)
 
 ---
 
