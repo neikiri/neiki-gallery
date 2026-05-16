@@ -28,6 +28,9 @@
     "album",
     "infinite-scroll"
   ],
+  "scripts": {
+    "test": "node --check src/neiki-gallery.js"
+  },
   "main": "dist/neiki-gallery.js",
   "exports": {
     ".": "./dist/neiki-gallery.js",
