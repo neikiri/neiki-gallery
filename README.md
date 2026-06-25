@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/css-%23663399.svg?style=for-the-badge&logo=css&logoColor=white" alt="CSS">
   <br>
   <img src="https://img.shields.io/badge/License-MIT-2563EB?style=for-the-badge&logo=open-source-initiative&logoColor=white&labelColor=000F15&logoWidth=20" alt="License">
-  <img src="https://img.shields.io/badge/Version-3.0.0-2563EB?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=000F15&logoWidth=20" alt="Version">
+  <img src="https://img.shields.io/badge/Version-3.1.0-2563EB?style=for-the-badge&logo=semantic-release&logoColor=white&labelColor=000F15&logoWidth=20" alt="Version">
 </p>
 
 <p align="center">
@@ -130,7 +130,7 @@ That's it — galleries with `data-neiki-gallery` auto-initialize on page load.
 
 > **Pin a specific version** to avoid unexpected changes:
 > ```
-> https://cdn.neikiri.dev/neiki-gallery/3.0.0/neiki-gallery.min.js
+> https://cdn.neikiri.dev/neiki-gallery/3.1.0/neiki-gallery.min.js
 > ```
 
 ### Self-Hosting (Local)
@@ -321,7 +321,7 @@ NeikiGallery.unregisterPlugin('watermark');
 NeikiGallery.getRegisteredPlugins();   // ['watermark', ...]
 
 // Version
-console.log(NeikiGallery.version);     // '3.0.0'
+console.log(NeikiGallery.version);     // '3.1.0'
 ```
 
 ### Plugin System

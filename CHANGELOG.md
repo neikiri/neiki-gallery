@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] — 2026-06-25
+
+### Fixed
+
+- **Loading spinner jitter** — the `@keyframes neiki-spin` for the infinite-scroll sentinel element was declared a second time with only `transform: rotate(360deg)`, overriding the lightbox spinner's `transform: translate(-50%, -50%) rotate(360deg)` declaration. This caused the spinner to visually drift up-left and snap back on every rotation cycle. The sentinel keyframe has been renamed to `neiki-spin-simple` so both animations are independent.
+- **No pan/drag after zoom** — after zooming into an image, mouse and touch dragging had no effect because the swipe handler bailed out immediately on `_isZoomed`. A dedicated pan handler is now attached to the image element: `mousedown`/`mousemove`/`mouseup` on desktop and `touchstart`/`touchmove`/`touchend` on mobile allow panning the zoomed image within the visible stage bounds. Pan offset resets automatically when zoom is toggled off or the slide changes. A small movement threshold (4 px) prevents a pure drag from also triggering the click-to-unzoom action.
+
+### Changed
+
+- Cursor on a zoomed image is now `grab` / `grabbing` instead of `zoom-out` to communicate that dragging is possible.
+
 ## [3.0.0] — 2026-04-28
 
 > **Major release.** This version introduces breaking changes — see Migration Guide

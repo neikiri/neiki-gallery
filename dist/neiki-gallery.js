@@ -1,5 +1,5 @@
 /*!
- * Neiki's Gallery v3.0.0
+ * Neiki's Gallery v3.1.0
  * A vanilla JavaScript image gallery / lightbox library.
  * No dependencies. No frameworks.
  *
@@ -1442,6 +1442,75 @@
     var self = this;
     var startX = 0, startY = 0, distX = 0, tracking = false, threshold = 50;
 
+    // Pan state for zoomed image dragging
+    var panActive = false;
+    var panStartX = 0, panStartY = 0;
+    var panOffsetX = 0, panOffsetY = 0;
+
+    function applyPan(dx, dy) {
+      var img = self._image;
+      var rect = img.getBoundingClientRect();
+      var stageRect = self._stage.getBoundingClientRect();
+      // Maximum allowed pan: half the overflow in each axis
+      var maxX = Math.max(0, (rect.width - stageRect.width) / 2);
+      var maxY = Math.max(0, (rect.height - stageRect.height) / 2);
+      panOffsetX = Math.max(-maxX, Math.min(maxX, panOffsetX + dx));
+      panOffsetY = Math.max(-maxY, Math.min(maxY, panOffsetY + dy));
+      img.style.translate = panOffsetX + 'px ' + panOffsetY + 'px';
+    }
+
+    var panDidMove = false;
+
+    function onPanStart(e) {
+      if (!self._isOpen || !self._isZoomed) return;
+      if (e.button !== undefined && e.button !== 0) return;
+      panActive = true;
+      panDidMove = false;
+      var point = e.touches ? e.touches[0] : e;
+      panStartX = point.clientX;
+      panStartY = point.clientY;
+      e.preventDefault();
+    }
+
+    function onPanMove(e) {
+      if (!panActive) return;
+      var point = e.touches ? e.touches[0] : e;
+      var dx = point.clientX - panStartX;
+      var dy = point.clientY - panStartY;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) panDidMove = true;
+      panStartX = point.clientX;
+      panStartY = point.clientY;
+      applyPan(dx, dy);
+      e.preventDefault();
+    }
+
+    function onPanEnd() {
+      panActive = false;
+    }
+
+    this._image.addEventListener('mousedown', onPanStart);
+    document.addEventListener('mousemove', onPanMove);
+    document.addEventListener('mouseup', onPanEnd);
+    this._image.addEventListener('touchstart', onPanStart, { passive: false });
+    this._image.addEventListener('touchmove', onPanMove, { passive: false });
+    this._image.addEventListener('touchend', onPanEnd, { passive: true });
+
+    // Suppress click-to-toggle-zoom when the user just dragged/panned the image
+    this._image.addEventListener('click', function (e) {
+      if (panDidMove) { panDidMove = false; e.stopImmediatePropagation(); }
+    }, true);
+
+    // Expose reset for use in _resetZoom
+    this._resetPan = function () {
+      panOffsetX = 0;
+      panOffsetY = 0;
+      panActive = false;
+      if (self._image) self._image.style.translate = '';
+    };
+
+    this._boundHandlers.panMousemove = onPanMove;
+    this._boundHandlers.panMouseup = onPanEnd;
+
     function onStart(e) {
       if (!self._isOpen || self._isZoomed) return;
       var point = e.touches ? e.touches[0] : e;
@@ -1716,6 +1785,7 @@
     this._image.classList.remove('neiki-zoomed', 'neiki-zoom-pan');
     this._image.style.removeProperty('--neiki-zoom-x');
     this._image.style.removeProperty('--neiki-zoom-y');
+    if (this._resetPan) this._resetPan();
   };
 
   /* ========================================================================
@@ -3580,7 +3650,7 @@
   // Static utilities (v3.0.0)
   // NeikiGallery.detectMediaType, registerPlugin, unregisterPlugin, getRegisteredPlugins
   // are exposed inside the v3 module sections above.
-  NeikiGallery.version = '3.0.0';
+  NeikiGallery.version = '3.1.0';
 
   return NeikiGallery;
 });

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Neiki's Gallery v3.0.0 — CSS
+   Neiki's Gallery v3.1.0 — CSS
    A vanilla JS image gallery/lightbox library.
    https://github.com/neikiri/neiki-gallery
 
@@ -568,7 +568,11 @@
 
 .neiki-lightbox__image.neiki-zoomed {
   transform: scale(var(--neiki-zoom-scale, 2));
-  cursor: zoom-out;
+  cursor: grab;
+}
+
+.neiki-lightbox__image.neiki-zoomed:active {
+  cursor: grabbing;
 }
 
 /* Contextual zoom (panned) — overrides scale zoom */
@@ -1574,7 +1578,7 @@
 
 
 /* ==========================================================================
-   v3.0.0 — NEW COMPONENTS
+   v3.1.0 — NEW COMPONENTS
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -2174,10 +2178,10 @@
   border: 2px solid currentColor;
   border-top-color: transparent;
   border-radius: 50%;
-  animation: neiki-spin 0.7s linear infinite;
+  animation: neiki-spin-simple 0.7s linear infinite;
 }
 
-@keyframes neiki-spin {
+@keyframes neiki-spin-simple {
   to { transform: rotate(360deg); }
 }
 
