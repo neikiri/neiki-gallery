@@ -1,5 +1,5 @@
 /*!
- * Neiki's Gallery v3.1.0
+ * Neiki's Gallery v3.2.0
  * A vanilla JavaScript image gallery / lightbox library.
  * No dependencies. No frameworks.
  *
@@ -1447,15 +1447,21 @@
     var panStartX = 0, panStartY = 0;
     var panOffsetX = 0, panOffsetY = 0;
 
-    function applyPan(dx, dy) {
+    function getPanBounds() {
       var img = self._image;
       var rect = img.getBoundingClientRect();
       var stageRect = self._stage.getBoundingClientRect();
-      // Maximum allowed pan: half the overflow in each axis
-      var maxX = Math.max(0, (rect.width - stageRect.width) / 2);
-      var maxY = Math.max(0, (rect.height - stageRect.height) / 2);
-      panOffsetX = Math.max(-maxX, Math.min(maxX, panOffsetX + dx));
-      panOffsetY = Math.max(-maxY, Math.min(maxY, panOffsetY + dy));
+      return {
+        x: Math.max(0, (rect.width - stageRect.width) / 2),
+        y: Math.max(0, (rect.height - stageRect.height) / 2)
+      };
+    }
+
+    function applyPan(dx, dy) {
+      // Permit overscroll while dragging; on release, snap back to the bounds.
+      var img = self._image;
+      panOffsetX += dx;
+      panOffsetY += dy;
       img.style.translate = panOffsetX + 'px ' + panOffsetY + 'px';
     }
 
@@ -1466,6 +1472,7 @@
       if (e.button !== undefined && e.button !== 0) return;
       panActive = true;
       panDidMove = false;
+      self._image.classList.add('neiki-panning');
       var point = e.touches ? e.touches[0] : e;
       panStartX = point.clientX;
       panStartY = point.clientY;
@@ -1485,7 +1492,16 @@
     }
 
     function onPanEnd() {
+      if (!panActive) return;
       panActive = false;
+      self._image.classList.remove('neiki-panning');
+
+      // Removing the panning class re-enables the CSS transition, producing
+      // the bounce-back when an image was dragged outside the stage bounds.
+      var bounds = getPanBounds();
+      panOffsetX = Math.max(-bounds.x, Math.min(bounds.x, panOffsetX));
+      panOffsetY = Math.max(-bounds.y, Math.min(bounds.y, panOffsetY));
+      self._image.style.translate = panOffsetX + 'px ' + panOffsetY + 'px';
     }
 
     this._image.addEventListener('mousedown', onPanStart);
@@ -1505,7 +1521,10 @@
       panOffsetX = 0;
       panOffsetY = 0;
       panActive = false;
-      if (self._image) self._image.style.translate = '';
+      if (self._image) {
+        self._image.classList.remove('neiki-panning');
+        self._image.style.translate = '';
+      }
     };
 
     this._boundHandlers.panMousemove = onPanMove;
@@ -3650,7 +3669,7 @@
   // Static utilities (v3.0.0)
   // NeikiGallery.detectMediaType, registerPlugin, unregisterPlugin, getRegisteredPlugins
   // are exposed inside the v3 module sections above.
-  NeikiGallery.version = '3.1.0';
+  NeikiGallery.version = '3.2.0';
 
   return NeikiGallery;
 });

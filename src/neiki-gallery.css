@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Neiki's Gallery v3.1.0 — CSS
+   Neiki's Gallery v3.2.0 — CSS
    A vanilla JS image gallery/lightbox library.
    https://github.com/neikiri/neiki-gallery
 
@@ -561,6 +561,7 @@
   border-radius: var(--neiki-border-radius, 14px);
   cursor: zoom-in;
   transition: transform 0.35s var(--neiki-transition-easing),
+              translate 0.35s var(--neiki-transition-easing),
               opacity var(--neiki-transition-duration) var(--neiki-transition-easing);
   -webkit-user-drag: none;
   pointer-events: auto;
@@ -573,6 +574,12 @@
 
 .neiki-lightbox__image.neiki-zoomed:active {
   cursor: grabbing;
+}
+
+/* Disable interpolation during a drag; restoring it on release springs an
+   overscrolled image back within the visible stage. */
+.neiki-lightbox__image.neiki-panning {
+  transition: none;
 }
 
 /* Contextual zoom (panned) — overrides scale zoom */
@@ -1578,7 +1585,7 @@
 
 
 /* ==========================================================================
-   v3.1.0 — NEW COMPONENTS
+   v3.2.0 — NEW COMPONENTS
    ========================================================================== */
 
 /* --------------------------------------------------------------------------

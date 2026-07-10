@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.2.0]
+
+### Changed
+
+- **Elastic zoom pan** — zoomed images can now be dragged beyond the visible stage bounds. On mouse or touch release, the image smoothly springs back to the nearest valid position, making image inspection feel more natural while preserving full edge coverage.
+
 ## [3.1.0] — 2026-06-25
 
 ### Fixed
