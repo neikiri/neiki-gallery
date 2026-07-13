@@ -1,765 +1,780 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta name="description" content="Demo of Neiki's Gallery, a responsive vanilla JavaScript image gallery and lightbox with no dependencies."><meta name="robots" content="index, follow"><meta property="og:type" content="website"><meta property="og:title" content="Neiki's Gallery – JavaScript Image Gallery"><meta property="og:description" content="A responsive vanilla JavaScript image gallery and lightbox with no dependencies."><meta property="og:url" content="https://neikiri.dev/gallery/"><meta name="twitter:card" content="summary">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neiki's Gallery — Demo</title>
-  <style>
-    /* ---------- Demo page styles ---------- */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <meta name="description" content="Demo of Neiki's Gallery, a responsive vanilla JavaScript image gallery and lightbox with no dependencies.">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Neiki's Gallery – JavaScript Image Gallery">
+    <meta property="og:description" content="A responsive vanilla JavaScript image gallery and lightbox with no dependencies.">
+    <meta property="og:url" content="https://neikiri.dev/gallery/">
+    <meta name="twitter:card" content="summary">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neiki's Gallery — Demo</title>
+    <style>
+        /* ---------- Demo page styles ---------- */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    body {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      background: #0f0f0f;
-      color: #e0e0e0;
-      line-height: 1.6;
-      padding: 0 0 80px;
-    }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            line-height: 1.6;
+            padding: 0 0 80px;
+        }
 
-    /* Hero */
-    .hero {
-      text-align: center;
-      padding: 60px 20px 40px;
-    }
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
 
-    .hero-logo {
-      display: block;
-      width: 100%;
-      max-width: 700px;
-      height: auto;
-      margin: 0 auto;
-    }
+        .hero-logo {
+            display: block;
+            width: 100%;
+            max-width: 700px;
+            height: auto;
+            margin: 0 auto;
+        }
 
-    .hero p {
-      margin-top: 12px;
-      color: #999;
-      font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-      max-width: 560px;
-      margin-left: auto;
-      margin-right: auto;
-      padding: 0 10px;
-    }
+        .hero p {
+            margin-top: 12px;
+            color: #999;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            max-width: 560px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 10px;
+        }
 
-    /* Sections */
-    .section {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
+        /* Sections */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
 
-    .section h2 {
-      font-size: clamp(1.15rem, 3vw, 1.5rem);
-      font-weight: 700;
-      margin: 48px 0 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #2a2a2a;
-    }
+        .section h2 {
+            font-size: clamp(1.15rem, 3vw, 1.5rem);
+            font-weight: 700;
+            margin: 48px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2a2a2a;
+        }
 
-    .section p.desc {
-      color: #888;
-      margin-bottom: 20px;
-      font-size: clamp(0.82rem, 2vw, 0.95rem);
-    }
+        .section p.desc {
+            color: #888;
+            margin-bottom: 20px;
+            font-size: clamp(0.82rem, 2vw, 0.95rem);
+        }
 
-    /* Feature tags */
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 24px;
-    }
+        /* Feature tags */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
 
-    .tag {
-      display: inline-block;
-      padding: 4px 12px;
-      background: rgba(59, 130, 246, 0.15);
-      color: #6ba3f7;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 500;
-    }
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(59, 130, 246, 0.15);
+            color: #6ba3f7;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 500;
+        }
 
-    /* API Demo Buttons */
-    .api-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
+        /* API Demo Buttons */
+        .api-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
 
-    .api-controls button {
-      padding: 8px 20px;
-      border: 1px solid #444;
-      background: #1a1a1a;
-      color: #ccc;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.2s, border-color 0.2s;
-    }
+        .api-controls button {
+            padding: 8px 20px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #ccc;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s, border-color 0.2s;
+        }
 
-    .api-controls button:hover {
-      background: #2a2a2a;
-      border-color: #3b82f6;
-      color: #fff;
-    }
+        .api-controls button:hover {
+            background: #2a2a2a;
+            border-color: #3b82f6;
+            color: #fff;
+        }
 
-    /* Events log */
-    .events-log {
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 8px;
-      padding: 16px;
-      margin-top: 16px;
-      max-height: 160px;
-      overflow-y: auto;
-      font-family: 'SF Mono', Consolas, monospace;
-      font-size: 0.82rem;
-      line-height: 1.7;
-      color: #6ba3f7;
-    }
+        /* Events log */
+        .events-log {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            max-height: 160px;
+            overflow-y: auto;
+            font-family: 'SF Mono', Consolas, monospace;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: #6ba3f7;
+        }
 
-    .events-log:empty::before {
-      content: 'Events will appear here…';
-      color: #555;
-    }
+        .events-log:empty::before {
+            content: 'Events will appear here…';
+            color: #555;
+        }
 
-    /* Footer */
-    .footer {
-      text-align: center;
-      padding: 60px 20px 0;
-      color: #555;
-      font-size: 0.85rem;
-    }
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 60px 20px 0;
+            color: #555;
+            font-size: 0.85rem;
+        }
 
-    .footer a {
-      color: #3b82f6;
-      text-decoration: none;
-    }
+        .footer a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
 
-    /* Compare container */
-    #compare-demo {
-      max-width: 800px;
-      margin: 0 auto;
-    }
+        /* Compare container */
+        #compare-demo {
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-    /* Override columns for specific galleries */
-    #gallery-grid {
-      --neiki-columns: 4;
-    }
+        /* Override columns for specific galleries */
+        #gallery-grid {
+            --neiki-columns: 4;
+        }
 
-    /* ========== Responsive — Demo Page ========== */
+        /* ========== Responsive — Demo Page ========== */
 
-    @media (max-width: 1024px) {
-      .hero {
-        padding: 48px 16px 32px;
-      }
-    }
+        @media (max-width: 1024px) {
+            .hero {
+                padding: 48px 16px 32px;
+            }
+        }
 
-    @media (max-width: 768px) {
-      body {
-        padding-bottom: 48px;
-      }
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 48px;
+            }
 
-      .hero {
-        padding: 36px 14px 24px;
-      }
+            .hero {
+                padding: 36px 14px 24px;
+            }
 
-      .section {
-        padding: 0 14px;
-      }
+            .section {
+                padding: 0 14px;
+            }
 
-      .section h2 {
-        margin: 36px 0 16px;
-      }
+            .section h2 {
+                margin: 36px 0 16px;
+            }
 
-      .tags {
-        gap: 6px;
-      }
+            .tags {
+                gap: 6px;
+            }
 
-      .tag {
-        padding: 3px 10px;
-        font-size: 0.76rem;
-      }
+            .tag {
+                padding: 3px 10px;
+                font-size: 0.76rem;
+            }
 
-      .api-controls {
-        gap: 8px;
-      }
+            .api-controls {
+                gap: 8px;
+            }
 
-      .api-controls button {
-        padding: 7px 14px;
-        font-size: 0.82rem;
-      }
+            .api-controls button {
+                padding: 7px 14px;
+                font-size: 0.82rem;
+            }
 
-      .events-log {
-        padding: 12px;
-        font-size: 0.76rem;
-        max-height: 130px;
-      }
+            .events-log {
+                padding: 12px;
+                font-size: 0.76rem;
+                max-height: 130px;
+            }
 
-      .footer {
-        padding: 40px 14px 0;
-        font-size: 0.8rem;
-      }
-    }
+            .footer {
+                padding: 40px 14px 0;
+                font-size: 0.8rem;
+            }
+        }
 
-    @media (max-width: 480px) {
-      body {
-        padding-bottom: 32px;
-      }
+        @media (max-width: 480px) {
+            body {
+                padding-bottom: 32px;
+            }
 
-      .hero {
-        padding: 28px 10px 18px;
-      }
+            .hero {
+                padding: 28px 10px 18px;
+            }
 
-      .hero p {
-        margin-top: 8px;
-      }
+            .hero p {
+                margin-top: 8px;
+            }
 
-      .section {
-        padding: 0 10px;
-      }
+            .section {
+                padding: 0 10px;
+            }
 
-      .section h2 {
-        margin: 28px 0 12px;
-        padding-bottom: 8px;
-      }
+            .section h2 {
+                margin: 28px 0 12px;
+                padding-bottom: 8px;
+            }
 
-      .api-controls {
-        flex-direction: column;
-      }
+            .api-controls {
+                flex-direction: column;
+            }
 
-      .api-controls button {
-        width: 100%;
-        text-align: center;
-      }
+            .api-controls button {
+                width: 100%;
+                text-align: center;
+            }
 
-      .footer {
-        padding: 28px 10px 0;
-      }
-    }
-  </style>
+            .footer {
+                padding: 28px 10px 0;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-  <!-- ================================================================
+    <!-- ================================================================
        Hero
        ================================================================ -->
-  <header class="hero">
-    <img src="logo.png" class="hero-logo" alt="Neiki's Gallery">
-    <p>A zero-dependency vanilla JavaScript image gallery &amp; lightbox. Drop two files, get a beautiful gallery.</p>
-    <div class="tags" style="justify-content: center; margin-top: 20px;">
-      <span class="tag">4 Layouts</span>
-      <span class="tag">Glassmorphism</span>
-      <span class="tag">Slideshow</span>
-      <span class="tag">Compare Slider</span>
-      <span class="tag">Share / Download</span>
-      <span class="tag">Tag Filtering</span>
-      <span class="tag">Batch Select</span>
-      <span class="tag">Contextual Zoom</span>
-      <span class="tag">Touch / Swipe</span>
-      <span class="tag">Lazy Loading</span>
-      <span class="tag">Deep Linking</span>
-      <span class="tag">Theming</span>
-      <span class="tag">Story Mode</span>
-      <span class="tag">Picture-in-Picture</span>
-      <span class="tag">EXIF Overlay</span>
-      <span class="tag">Color Palette</span>
-      <span class="tag">Blurhash</span>
-      <span class="tag">Focus Point</span>
-      <span class="tag">Backdrop Tint</span>
-      <span class="tag">Drag & Drop</span>
-      <span class="tag">FLIP Morph</span>
-      <span class="tag">Virtual Scroll</span>
-      <span class="tag">Web Share API</span>
-      <span class="tag">Video / YouTube / Vimeo</span>
-      <span class="tag">Plugin System</span>
-      <span class="tag">Album Groups</span>
-      <span class="tag">Favorites</span>
-      <span class="tag">Info Panel</span>
-      <span class="tag">Image Editor</span>
-      <span class="tag">Annotation</span>
-      <span class="tag">Print</span>
-      <span class="tag">Context Menu</span>
-      <span class="tag">Infinite Scroll</span>
-      <span class="tag">Kenburns</span>
-      <span class="tag">0 Dependencies</span>
-    </div>
-  </header>
+    <header class="hero">
+        <img src="logo.png" class="hero-logo" alt="Neiki's Gallery">
+        <p>A zero-dependency vanilla JavaScript image gallery &amp; lightbox. Drop two files, get a beautiful gallery.</p>
+        <div class="tags" style="justify-content: center; margin-top: 20px;">
+            <span class="tag">4 Layouts</span>
+            <span class="tag">Glassmorphism</span>
+            <span class="tag">Slideshow</span>
+            <span class="tag">Compare Slider</span>
+            <span class="tag">Share / Download</span>
+            <span class="tag">Tag Filtering</span>
+            <span class="tag">Batch Select</span>
+            <span class="tag">Contextual Zoom</span>
+            <span class="tag">Touch / Swipe</span>
+            <span class="tag">Lazy Loading</span>
+            <span class="tag">Deep Linking</span>
+            <span class="tag">Theming</span>
+            <span class="tag">Story Mode</span>
+            <span class="tag">Picture-in-Picture</span>
+            <span class="tag">EXIF Overlay</span>
+            <span class="tag">Color Palette</span>
+            <span class="tag">Blurhash</span>
+            <span class="tag">Focus Point</span>
+            <span class="tag">Backdrop Tint</span>
+            <span class="tag">Drag & Drop</span>
+            <span class="tag">FLIP Morph</span>
+            <span class="tag">Virtual Scroll</span>
+            <span class="tag">Web Share API</span>
+            <span class="tag">Video / YouTube / Vimeo</span>
+            <span class="tag">Plugin System</span>
+            <span class="tag">Album Groups</span>
+            <span class="tag">Favorites</span>
+            <span class="tag">Info Panel</span>
+            <span class="tag">Image Editor</span>
+            <span class="tag">Annotation</span>
+            <span class="tag">Print</span>
+            <span class="tag">Context Menu</span>
+            <span class="tag">Infinite Scroll</span>
+            <span class="tag">Kenburns</span>
+            <span class="tag">0 Dependencies</span>
+        </div>
+    </header>
 
-  <!-- ================================================================
+    <!-- ================================================================
        1. Masonry Gallery (Auto-init, Dark Theme)
        ================================================================ -->
-  <div class="section">
-    <h2>1. Masonry Layout — Dark Theme (Auto-init)</h2>
-    <p class="desc">Uses <code>data-neiki-gallery</code> for zero-JS initialization. Masonry layout with dark theme, fade transition.</p>
+    <div class="section">
+        <h2>1. Masonry Layout — Dark Theme (Auto-init)</h2>
+        <p class="desc">Uses <code>data-neiki-gallery</code> for zero-JS initialization. Masonry layout with dark theme, fade transition.</p>
 
-    <div data-neiki-gallery data-layout="masonry" data-theme="dark" data-transition="fade" data-morph-transition="true" id="gallery-masonry">
-      <a href="https://picsum.photos/id/10/1200/800" data-caption="Lush forest trail">
-        <img src="https://picsum.photos/id/10/400/267" alt="Forest trail">
-      </a>
-      <a href="https://picsum.photos/id/11/1200/800" data-caption="Autumn lake reflections">
-        <img src="https://picsum.photos/id/11/400/267" alt="Autumn lake">
-      </a>
-      <a href="https://picsum.photos/id/14/1200/800" data-caption="Mountain bridge at sunset">
-        <img src="https://picsum.photos/id/14/400/267" alt="Mountain bridge">
-      </a>
-      <a href="https://picsum.photos/id/15/1200/800" data-caption="Path through the pines">
-        <img src="https://picsum.photos/id/15/400/267" alt="Pine path">
-      </a>
-      <a href="https://picsum.photos/id/16/1200/800" data-caption="Waves on the shore">
-        <img src="https://picsum.photos/id/16/400/267" alt="Shore waves">
-      </a>
-      <a href="https://picsum.photos/id/17/1200/800" data-caption="Rocky coastline">
-        <img src="https://picsum.photos/id/17/400/267" alt="Coastline">
-      </a>
-      <a href="https://picsum.photos/id/18/1200/800" data-caption="Serene countryside">
-        <img src="https://picsum.photos/id/18/400/267" alt="Countryside">
-      </a>
-      <a href="https://picsum.photos/id/19/1200/900" data-caption="Desert landscape">
-        <img src="https://picsum.photos/id/19/400/300" alt="Desert">
-      </a>
-      <a href="https://picsum.photos/id/20/1200/800" data-caption="Bird's eye city view">
-        <img src="https://picsum.photos/id/20/400/267" alt="City view">
-      </a>
-      <a href="https://picsum.photos/id/21/1200/800" data-caption="Waterfall in the jungle">
-        <img src="https://picsum.photos/id/21/400/267" alt="Waterfall">
-      </a>
-      <a href="https://picsum.photos/id/22/1200/800" data-caption="Snowy mountain peak">
-        <img src="https://picsum.photos/id/22/400/267" alt="Snowy peak">
-      </a>
-      <a href="https://picsum.photos/id/23/1200/800" data-caption="Golden hour meadow">
-        <img src="https://picsum.photos/id/23/400/267" alt="Meadow">
-      </a>
+        <div data-neiki-gallery data-layout="masonry" data-theme="dark" data-transition="fade" data-morph-transition="true" id="gallery-masonry">
+            <a href="https://picsum.photos/id/10/1200/800" data-caption="Lush forest trail">
+                <img src="https://picsum.photos/id/10/400/267" alt="Forest trail">
+            </a>
+            <a href="https://picsum.photos/id/11/1200/800" data-caption="Autumn lake reflections">
+                <img src="https://picsum.photos/id/11/400/267" alt="Autumn lake">
+            </a>
+            <a href="https://picsum.photos/id/14/1200/800" data-caption="Mountain bridge at sunset">
+                <img src="https://picsum.photos/id/14/400/267" alt="Mountain bridge">
+            </a>
+            <a href="https://picsum.photos/id/15/1200/800" data-caption="Path through the pines">
+                <img src="https://picsum.photos/id/15/400/267" alt="Pine path">
+            </a>
+            <a href="https://picsum.photos/id/16/1200/800" data-caption="Waves on the shore">
+                <img src="https://picsum.photos/id/16/400/267" alt="Shore waves">
+            </a>
+            <a href="https://picsum.photos/id/17/1200/800" data-caption="Rocky coastline">
+                <img src="https://picsum.photos/id/17/400/267" alt="Coastline">
+            </a>
+            <a href="https://picsum.photos/id/18/1200/800" data-caption="Serene countryside">
+                <img src="https://picsum.photos/id/18/400/267" alt="Countryside">
+            </a>
+            <a href="https://picsum.photos/id/19/1200/900" data-caption="Desert landscape">
+                <img src="https://picsum.photos/id/19/400/300" alt="Desert">
+            </a>
+            <a href="https://picsum.photos/id/20/1200/800" data-caption="Bird's eye city view">
+                <img src="https://picsum.photos/id/20/400/267" alt="City view">
+            </a>
+            <a href="https://picsum.photos/id/21/1200/800" data-caption="Waterfall in the jungle">
+                <img src="https://picsum.photos/id/21/400/267" alt="Waterfall">
+            </a>
+            <a href="https://picsum.photos/id/22/1200/800" data-caption="Snowy mountain peak">
+                <img src="https://picsum.photos/id/22/400/267" alt="Snowy peak">
+            </a>
+            <a href="https://picsum.photos/id/23/1200/800" data-caption="Golden hour meadow">
+                <img src="https://picsum.photos/id/23/400/267" alt="Meadow">
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        2. Mosaic Layout with Tag Filtering
        ================================================================ -->
-  <div class="section">
-    <h2>2. Mosaic Layout — Tag Filtering</h2>
-    <p class="desc">Mosaic layout with <code>data-size</code> tiles and automatic tag filtering from <code>data-tags</code>.</p>
+    <div class="section">
+        <h2>2. Mosaic Layout — Tag Filtering</h2>
+        <p class="desc">Mosaic layout with <code>data-size</code> tiles and automatic tag filtering from <code>data-tags</code>.</p>
 
-    <div data-neiki-gallery data-layout="mosaic" data-theme="dark" data-filter="true" data-backdrop-tint="true" data-color-palette="true" id="gallery-mosaic">
-      <a href="https://picsum.photos/id/24/1200/800" data-caption="Calm ocean" data-tags="nature,water" data-size="large">
-        <img src="https://picsum.photos/id/24/600/400" alt="Ocean">
-      </a>
-      <a href="https://picsum.photos/id/25/1200/800" data-caption="Architectural wonder" data-tags="architecture">
-        <img src="https://picsum.photos/id/25/400/400" alt="Architecture">
-      </a>
-      <a href="https://picsum.photos/id/26/1200/800" data-caption="Night city lights" data-tags="architecture,city" data-size="wide">
-        <img src="https://picsum.photos/id/26/600/300" alt="City lights">
-      </a>
-      <a href="https://picsum.photos/id/27/1200/800" data-caption="Misty morning" data-tags="nature">
-        <img src="https://picsum.photos/id/27/400/400" alt="Misty morning">
-      </a>
-      <a href="https://picsum.photos/id/28/1200/800" data-caption="Vintage camera" data-tags="objects" data-size="tall">
-        <img src="https://picsum.photos/id/28/400/600" alt="Camera">
-      </a>
-      <a href="https://picsum.photos/id/29/1200/800" data-caption="Rustic barn" data-tags="architecture,nature">
-        <img src="https://picsum.photos/id/29/400/400" alt="Barn">
-      </a>
-      <a href="https://picsum.photos/id/30/1200/800" data-caption="Spring blossoms" data-tags="nature">
-        <img src="https://picsum.photos/id/30/400/400" alt="Blossoms">
-      </a>
-      <a href="https://picsum.photos/id/31/1200/800" data-caption="Golden bridge" data-tags="architecture,city">
-        <img src="https://picsum.photos/id/31/400/400" alt="Bridge">
-      </a>
+        <div data-neiki-gallery data-layout="mosaic" data-theme="dark" data-filter="true" data-backdrop-tint="true" data-color-palette="true" id="gallery-mosaic">
+            <a href="https://picsum.photos/id/24/1200/800" data-caption="Calm ocean" data-tags="nature,water" data-size="large">
+                <img src="https://picsum.photos/id/24/600/400" alt="Ocean">
+            </a>
+            <a href="https://picsum.photos/id/25/1200/800" data-caption="Architectural wonder" data-tags="architecture">
+                <img src="https://picsum.photos/id/25/400/400" alt="Architecture">
+            </a>
+            <a href="https://picsum.photos/id/26/1200/800" data-caption="Night city lights" data-tags="architecture,city" data-size="wide">
+                <img src="https://picsum.photos/id/26/600/300" alt="City lights">
+            </a>
+            <a href="https://picsum.photos/id/27/1200/800" data-caption="Misty morning" data-tags="nature">
+                <img src="https://picsum.photos/id/27/400/400" alt="Misty morning">
+            </a>
+            <a href="https://picsum.photos/id/28/1200/800" data-caption="Vintage camera" data-tags="objects" data-size="tall">
+                <img src="https://picsum.photos/id/28/400/600" alt="Camera">
+            </a>
+            <a href="https://picsum.photos/id/29/1200/800" data-caption="Rustic barn" data-tags="architecture,nature">
+                <img src="https://picsum.photos/id/29/400/400" alt="Barn">
+            </a>
+            <a href="https://picsum.photos/id/30/1200/800" data-caption="Spring blossoms" data-tags="nature">
+                <img src="https://picsum.photos/id/30/400/400" alt="Blossoms">
+            </a>
+            <a href="https://picsum.photos/id/31/1200/800" data-caption="Golden bridge" data-tags="architecture,city">
+                <img src="https://picsum.photos/id/31/400/400" alt="Bridge">
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        3. Filmstrip Layout
        ================================================================ -->
-  <div class="section">
-    <h2>3. Filmstrip Layout — Horizontal Scroll</h2>
-    <p class="desc">Horizontal scrollable filmstrip with scroll snap. Light theme with slide transition.</p>
+    <div class="section">
+        <h2>3. Filmstrip Layout — Horizontal Scroll</h2>
+        <p class="desc">Horizontal scrollable filmstrip with scroll snap. Light theme with slide transition.</p>
 
-    <div data-neiki-gallery data-layout="filmstrip" data-theme="light" data-transition="slide" data-loop="true" id="gallery-filmstrip">
-      <a href="https://picsum.photos/id/40/1200/800" data-caption="Mountain lake">
-        <img src="https://picsum.photos/id/40/400/500" alt="Mountain lake">
-      </a>
-      <a href="https://picsum.photos/id/41/1200/800" data-caption="Deep forest">
-        <img src="https://picsum.photos/id/41/400/500" alt="Forest">
-      </a>
-      <a href="https://picsum.photos/id/42/1200/800" data-caption="Rocky shore">
-        <img src="https://picsum.photos/id/42/400/500" alt="Rocky shore">
-      </a>
-      <a href="https://picsum.photos/id/43/1200/800" data-caption="Train tracks">
-        <img src="https://picsum.photos/id/43/400/500" alt="Train tracks">
-      </a>
-      <a href="https://picsum.photos/id/44/1200/800" data-caption="Glass building">
-        <img src="https://picsum.photos/id/44/400/500" alt="Glass building">
-      </a>
-      <a href="https://picsum.photos/id/45/1200/800" data-caption="Open field">
-        <img src="https://picsum.photos/id/45/400/500" alt="Open field">
-      </a>
-      <a href="https://picsum.photos/id/46/1200/800" data-caption="Abandoned house">
-        <img src="https://picsum.photos/id/46/400/500" alt="Abandoned house">
-      </a>
-      <a href="https://picsum.photos/id/47/1200/800" data-caption="Wind turbines">
-        <img src="https://picsum.photos/id/47/400/500" alt="Wind turbines">
-      </a>
+        <div data-neiki-gallery data-layout="filmstrip" data-theme="light" data-transition="slide" data-loop="true" id="gallery-filmstrip">
+            <a href="https://picsum.photos/id/40/1200/800" data-caption="Mountain lake">
+                <img src="https://picsum.photos/id/40/400/500" alt="Mountain lake">
+            </a>
+            <a href="https://picsum.photos/id/41/1200/800" data-caption="Deep forest">
+                <img src="https://picsum.photos/id/41/400/500" alt="Forest">
+            </a>
+            <a href="https://picsum.photos/id/42/1200/800" data-caption="Rocky shore">
+                <img src="https://picsum.photos/id/42/400/500" alt="Rocky shore">
+            </a>
+            <a href="https://picsum.photos/id/43/1200/800" data-caption="Train tracks">
+                <img src="https://picsum.photos/id/43/400/500" alt="Train tracks">
+            </a>
+            <a href="https://picsum.photos/id/44/1200/800" data-caption="Glass building">
+                <img src="https://picsum.photos/id/44/400/500" alt="Glass building">
+            </a>
+            <a href="https://picsum.photos/id/45/1200/800" data-caption="Open field">
+                <img src="https://picsum.photos/id/45/400/500" alt="Open field">
+            </a>
+            <a href="https://picsum.photos/id/46/1200/800" data-caption="Abandoned house">
+                <img src="https://picsum.photos/id/46/400/500" alt="Abandoned house">
+            </a>
+            <a href="https://picsum.photos/id/47/1200/800" data-caption="Wind turbines">
+                <img src="https://picsum.photos/id/47/400/500" alt="Wind turbines">
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        4. Comparison Slider
        ================================================================ -->
-  <div class="section">
-    <h2>4. Comparison Slider</h2>
-    <p class="desc">Before/after image comparison using <code>NeikiGallery.compare()</code>. Drag the handle to compare.</p>
-    <div id="compare-demo"></div>
-  </div>
+    <div class="section">
+        <h2>4. Comparison Slider</h2>
+        <p class="desc">Before/after image comparison using <code>NeikiGallery.compare()</code>. Drag the handle to compare.</p>
+        <div id="compare-demo"></div>
+    </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        5. Manual Init + JS API Demo
        ================================================================ -->
-  <div class="section">
-    <h2>5. Manual JS Init + API Demo</h2>
-    <p class="desc">Initialized via <code>new NeikiGallery()</code> with slideshow, batch select, and contextual zoom. Use buttons to control.</p>
+    <div class="section">
+        <h2>5. Manual JS Init + API Demo</h2>
+        <p class="desc">Initialized via <code>new NeikiGallery()</code> with slideshow, batch select, and contextual zoom. Use buttons to control.</p>
 
-    <div class="api-controls">
-      <button onclick="apiGallery.open(0)">Open at #1</button>
-      <button onclick="apiGallery.open(3)">Open at #4</button>
-      <button onclick="apiGallery.next()">Next</button>
-      <button onclick="apiGallery.prev()">Prev</button>
-      <button onclick="apiGallery.close()">Close</button>
-      <button onclick="apiGallery.toggleSlideshow()">Toggle Slideshow</button>
-      <button onclick="alert(JSON.stringify(apiGallery.getSelected()))">Get Selected</button>
-      <button onclick="apiGallery.clearSelection()">Clear Selection</button>
+        <div class="api-controls">
+            <button onclick="apiGallery.open(0)">Open at #1</button>
+            <button onclick="apiGallery.open(3)">Open at #4</button>
+            <button onclick="apiGallery.next()">Next</button>
+            <button onclick="apiGallery.prev()">Prev</button>
+            <button onclick="apiGallery.close()">Close</button>
+            <button onclick="apiGallery.toggleSlideshow()">Toggle Slideshow</button>
+            <button onclick="alert(JSON.stringify(apiGallery.getSelected()))">Get Selected</button>
+            <button onclick="apiGallery.clearSelection()">Clear Selection</button>
+        </div>
+
+        <div id="gallery-api">
+            <a href="https://picsum.photos/id/32/1200/800" data-caption="Cozy cabin retreat">
+                <img src="https://picsum.photos/id/32/400/267" alt="Cabin">
+            </a>
+            <a href="https://picsum.photos/id/33/1200/800" data-caption="Starry night sky">
+                <img src="https://picsum.photos/id/33/400/267" alt="Stars">
+            </a>
+            <a href="https://picsum.photos/id/34/1200/800" data-caption="Lighthouse on the cliff">
+                <img src="https://picsum.photos/id/34/400/267" alt="Lighthouse">
+            </a>
+            <a href="https://picsum.photos/id/35/1200/800" data-caption="Rainy street">
+                <img src="https://picsum.photos/id/35/400/267" alt="Rainy street">
+            </a>
+            <a href="https://picsum.photos/id/36/1200/800" data-caption="Tropical beach">
+                <img src="https://picsum.photos/id/36/400/267" alt="Beach">
+            </a>
+            <a href="https://picsum.photos/id/37/1200/800" data-caption="Cherry blossoms in spring">
+                <img src="https://picsum.photos/id/37/400/267" alt="Cherry blossoms">
+            </a>
+        </div>
+
+        <div class="events-log" id="events-log"></div>
     </div>
 
-    <div id="gallery-api">
-      <a href="https://picsum.photos/id/32/1200/800" data-caption="Cozy cabin retreat">
-        <img src="https://picsum.photos/id/32/400/267" alt="Cabin">
-      </a>
-      <a href="https://picsum.photos/id/33/1200/800" data-caption="Starry night sky">
-        <img src="https://picsum.photos/id/33/400/267" alt="Stars">
-      </a>
-      <a href="https://picsum.photos/id/34/1200/800" data-caption="Lighthouse on the cliff">
-        <img src="https://picsum.photos/id/34/400/267" alt="Lighthouse">
-      </a>
-      <a href="https://picsum.photos/id/35/1200/800" data-caption="Rainy street">
-        <img src="https://picsum.photos/id/35/400/267" alt="Rainy street">
-      </a>
-      <a href="https://picsum.photos/id/36/1200/800" data-caption="Tropical beach">
-        <img src="https://picsum.photos/id/36/400/267" alt="Beach">
-      </a>
-      <a href="https://picsum.photos/id/37/1200/800" data-caption="Cherry blossoms in spring">
-        <img src="https://picsum.photos/id/37/400/267" alt="Cherry blossoms">
-      </a>
-    </div>
-
-    <div class="events-log" id="events-log"></div>
-  </div>
-
-  <!-- ================================================================
+    <!-- ================================================================
        6. Story Mode + PiP Demo
        ================================================================ -->
-  <div class="section">
-    <h2>6. Story Mode + Picture-in-Picture</h2>
-    <p class="desc">Gallery with story mode (Instagram-like vertical viewer) and PiP (minimize lightbox to corner). Click the phone/PiP icons in the toolbar.</p>
+    <div class="section">
+        <h2>6. Story Mode + Picture-in-Picture</h2>
+        <p class="desc">Gallery with story mode (Instagram-like vertical viewer) and PiP (minimize lightbox to corner). Click the phone/PiP icons in the toolbar.</p>
 
-    <div data-neiki-gallery data-layout="grid" data-theme="dark" data-story-mode="true" data-pip="true" data-exif="true" id="gallery-story">
-      <a href="https://picsum.photos/id/50/1200/800" data-caption="Sunset coast">
-        <img src="https://picsum.photos/id/50/400/267" alt="Sunset coast">
-      </a>
-      <a href="https://picsum.photos/id/51/1200/800" data-caption="Mountain stream">
-        <img src="https://picsum.photos/id/51/400/267" alt="Mountain stream">
-      </a>
-      <a href="https://picsum.photos/id/52/1200/800" data-caption="Cloudy peaks">
-        <img src="https://picsum.photos/id/52/400/267" alt="Cloudy peaks">
-      </a>
-      <a href="https://picsum.photos/id/53/1200/800" data-caption="Morning dew">
-        <img src="https://picsum.photos/id/53/400/267" alt="Morning dew">
-      </a>
-      <a href="https://picsum.photos/id/54/1200/800" data-caption="Ancient ruins">
-        <img src="https://picsum.photos/id/54/400/267" alt="Ancient ruins">
-      </a>
-      <a href="https://picsum.photos/id/55/1200/800" data-caption="Forest path">
-        <img src="https://picsum.photos/id/55/400/267" alt="Forest path">
-      </a>
+        <div data-neiki-gallery data-layout="grid" data-theme="dark" data-story-mode="true" data-pip="true" data-exif="true" id="gallery-story">
+            <a href="https://picsum.photos/id/50/1200/800" data-caption="Sunset coast">
+                <img src="https://picsum.photos/id/50/400/267" alt="Sunset coast">
+            </a>
+            <a href="https://picsum.photos/id/51/1200/800" data-caption="Mountain stream">
+                <img src="https://picsum.photos/id/51/400/267" alt="Mountain stream">
+            </a>
+            <a href="https://picsum.photos/id/52/1200/800" data-caption="Cloudy peaks">
+                <img src="https://picsum.photos/id/52/400/267" alt="Cloudy peaks">
+            </a>
+            <a href="https://picsum.photos/id/53/1200/800" data-caption="Morning dew">
+                <img src="https://picsum.photos/id/53/400/267" alt="Morning dew">
+            </a>
+            <a href="https://picsum.photos/id/54/1200/800" data-caption="Ancient ruins">
+                <img src="https://picsum.photos/id/54/400/267" alt="Ancient ruins">
+            </a>
+            <a href="https://picsum.photos/id/55/1200/800" data-caption="Forest path">
+                <img src="https://picsum.photos/id/55/400/267" alt="Forest path">
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        7. Drag & Drop Reorder
        ================================================================ -->
-  <div class="section">
-    <h2>7. Drag & Drop Reorder</h2>
-    <p class="desc">Drag items to reorder them. Uses native HTML5 drag & drop. Get order via <code>gallery.getOrder()</code>.</p>
+    <div class="section">
+        <h2>7. Drag & Drop Reorder</h2>
+        <p class="desc">Drag items to reorder them. Uses native HTML5 drag & drop. Get order via <code>gallery.getOrder()</code>.</p>
 
-    <div data-neiki-gallery data-layout="grid" data-theme="dark" data-drag-reorder="true" id="gallery-drag">
-      <a href="https://picsum.photos/id/60/1200/800" data-caption="Image 1">
-        <img src="https://picsum.photos/id/60/400/267" alt="Image 1">
-      </a>
-      <a href="https://picsum.photos/id/61/1200/800" data-caption="Image 2">
-        <img src="https://picsum.photos/id/61/400/267" alt="Image 2">
-      </a>
-      <a href="https://picsum.photos/id/62/1200/800" data-caption="Image 3">
-        <img src="https://picsum.photos/id/62/400/267" alt="Image 3">
-      </a>
-      <a href="https://picsum.photos/id/63/1200/800" data-caption="Image 4">
-        <img src="https://picsum.photos/id/63/400/267" alt="Image 4">
-      </a>
-      <a href="https://picsum.photos/id/64/1200/800" data-caption="Image 5">
-        <img src="https://picsum.photos/id/64/400/267" alt="Image 5">
-      </a>
-      <a href="https://picsum.photos/id/65/1200/800" data-caption="Image 6">
-        <img src="https://picsum.photos/id/65/400/267" alt="Image 6">
-      </a>
+        <div data-neiki-gallery data-layout="grid" data-theme="dark" data-drag-reorder="true" id="gallery-drag">
+            <a href="https://picsum.photos/id/60/1200/800" data-caption="Image 1">
+                <img src="https://picsum.photos/id/60/400/267" alt="Image 1">
+            </a>
+            <a href="https://picsum.photos/id/61/1200/800" data-caption="Image 2">
+                <img src="https://picsum.photos/id/61/400/267" alt="Image 2">
+            </a>
+            <a href="https://picsum.photos/id/62/1200/800" data-caption="Image 3">
+                <img src="https://picsum.photos/id/62/400/267" alt="Image 3">
+            </a>
+            <a href="https://picsum.photos/id/63/1200/800" data-caption="Image 4">
+                <img src="https://picsum.photos/id/63/400/267" alt="Image 4">
+            </a>
+            <a href="https://picsum.photos/id/64/1200/800" data-caption="Image 5">
+                <img src="https://picsum.photos/id/64/400/267" alt="Image 5">
+            </a>
+            <a href="https://picsum.photos/id/65/1200/800" data-caption="Image 6">
+                <img src="https://picsum.photos/id/65/400/267" alt="Image 6">
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        8. Focus Point Demo
        ================================================================ -->
-  <div class="section">
-    <h2>8. Focus Point + Aspect Skeleton</h2>
-    <p class="desc">Images with <code>data-focus="x y"</code> for smart cropping and <code>data-width/data-height</code> for skeleton aspect ratio.</p>
+    <div class="section">
+        <h2>8. Focus Point + Aspect Skeleton</h2>
+        <p class="desc">Images with <code>data-focus="x y"</code> for smart cropping and <code>data-width/data-height</code> for skeleton aspect ratio.</p>
 
-    <div data-neiki-gallery data-layout="grid" data-theme="dark" id="gallery-focus">
-      <a href="https://picsum.photos/id/70/1200/800" data-caption="Center focus" data-width="1200" data-height="800">
-        <img src="https://picsum.photos/id/70/400/267" alt="Center" data-focus="0.5 0.5">
-      </a>
-      <a href="https://picsum.photos/id/71/1200/800" data-caption="Top-left focus" data-width="1200" data-height="800">
-        <img src="https://picsum.photos/id/71/400/267" alt="Top-left" data-focus="0.2 0.2">
-      </a>
-      <a href="https://picsum.photos/id/72/1200/800" data-caption="Bottom-right focus" data-width="1200" data-height="800">
-        <img src="https://picsum.photos/id/72/400/267" alt="Bottom-right" data-focus="0.8 0.8">
-      </a>
-      <a href="https://picsum.photos/id/73/1200/800" data-caption="Left center" data-width="1200" data-height="800">
-        <img src="https://picsum.photos/id/73/400/267" alt="Left center" data-focus="0.1 0.5">
-      </a>
+        <div data-neiki-gallery data-layout="grid" data-theme="dark" id="gallery-focus">
+            <a href="https://picsum.photos/id/70/1200/800" data-caption="Center focus" data-width="1200" data-height="800">
+                <img src="https://picsum.photos/id/70/400/267" alt="Center" data-focus="0.5 0.5">
+            </a>
+            <a href="https://picsum.photos/id/71/1200/800" data-caption="Top-left focus" data-width="1200" data-height="800">
+                <img src="https://picsum.photos/id/71/400/267" alt="Top-left" data-focus="0.2 0.2">
+            </a>
+            <a href="https://picsum.photos/id/72/1200/800" data-caption="Bottom-right focus" data-width="1200" data-height="800">
+                <img src="https://picsum.photos/id/72/400/267" alt="Bottom-right" data-focus="0.8 0.8">
+            </a>
+            <a href="https://picsum.photos/id/73/1200/800" data-caption="Left center" data-width="1200" data-height="800">
+                <img src="https://picsum.photos/id/73/400/267" alt="Left center" data-focus="0.1 0.5">
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        9. Video & YouTube/Vimeo (v3.0.0)
        ================================================================ -->
-  <div class="section">
-    <h2>9. Video, YouTube &amp; Vimeo Embeds</h2>
-    <p class="desc">Mix images with MP4 video files and YouTube/Vimeo embeds in a single gallery. Auto-detected from URL.</p>
+    <div class="section">
+        <h2>9. Video, YouTube &amp; Vimeo Embeds</h2>
+        <p class="desc">Mix images with MP4 video files and YouTube/Vimeo embeds in a single gallery. Auto-detected from URL.</p>
 
-    <div data-neiki-gallery data-layout="grid" data-theme="dark" data-context-menu="true" id="gallery-video">
-      <a href="https://www.w3schools.com/html/mov_bbb.mp4" data-poster="https://picsum.photos/id/231/400/267" data-caption="HTML5 video clip">
-        <img src="https://picsum.photos/id/231/400/267" alt="Video thumbnail">
-      </a>
-      <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" data-caption="YouTube embed example">
-        <img src="https://picsum.photos/id/232/400/267" alt="YouTube thumbnail">
-      </a>
-      <a href="https://vimeo.com/76979871" data-caption="Vimeo embed example">
-        <img src="https://picsum.photos/id/233/400/267" alt="Vimeo thumbnail">
-      </a>
-      <a href="https://picsum.photos/id/234/1200/800" data-caption="Regular image alongside video">
-        <img src="https://picsum.photos/id/234/400/267" alt="Image">
-      </a>
+        <div data-neiki-gallery data-layout="grid" data-theme="dark" data-context-menu="true" id="gallery-video">
+            <a href="https://www.w3schools.com/html/mov_bbb.mp4" data-poster="https://picsum.photos/id/231/400/267" data-caption="HTML5 video clip">
+                <img src="https://picsum.photos/id/231/400/267" alt="Video thumbnail">
+            </a>
+            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" data-caption="YouTube embed example">
+                <img src="https://picsum.photos/id/232/400/267" alt="YouTube thumbnail">
+            </a>
+            <a href="https://vimeo.com/76979871" data-caption="Vimeo embed example">
+                <img src="https://picsum.photos/id/233/400/267" alt="Vimeo thumbnail">
+            </a>
+            <a href="https://picsum.photos/id/234/1200/800" data-caption="Regular image alongside video">
+                <img src="https://picsum.photos/id/234/400/267" alt="Image">
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        10. Favorites + Info Panel + Print (v3.0.0)
        ================================================================ -->
-  <div class="section">
-    <h2>10. Favorites, Info Panel &amp; Print</h2>
-    <p class="desc">Heart icon to favorite (saved in <code>localStorage</code>), <kbd>I</kbd> for info sidebar, <kbd>B</kbd> to bookmark, <kbd>P</kbd> to print, <kbd>?</kbd> for shortcuts help.</p>
+    <div class="section">
+        <h2>10. Favorites, Info Panel &amp; Print</h2>
+        <p class="desc">Heart icon to favorite (saved in <code>localStorage</code>), <kbd>I</kbd> for info sidebar, <kbd>B</kbd> to bookmark, <kbd>P</kbd> to print, <kbd>?</kbd> for shortcuts help.</p>
 
-    <div data-neiki-gallery data-layout="grid" data-theme="dark"
-         data-favorites="true" data-info-panel="true" data-shortcuts-help="true"
-         data-print="true" data-context-menu="true" id="gallery-favorites">
-      <a href="https://picsum.photos/id/240/1200/800" data-caption="Aurora over a frozen lake" data-tags="nature,winter" data-width="1200" data-height="800">
-        <img src="https://picsum.photos/id/240/400/267" alt="Aurora">
-      </a>
-      <a href="https://picsum.photos/id/241/1200/800" data-caption="Forest path at dusk" data-tags="nature,forest" data-width="1200" data-height="800">
-        <img src="https://picsum.photos/id/241/400/267" alt="Forest">
-      </a>
-      <a href="https://picsum.photos/id/242/1200/800" data-caption="Coastal cliffs" data-tags="nature,coast" data-width="1200" data-height="800">
-        <img src="https://picsum.photos/id/242/400/267" alt="Cliffs">
-      </a>
-      <a href="https://picsum.photos/id/243/1200/800" data-caption="Sand dunes at sunrise" data-tags="nature,desert" data-width="1200" data-height="800">
-        <img src="https://picsum.photos/id/243/400/267" alt="Dunes">
-      </a>
+        <div data-neiki-gallery data-layout="grid" data-theme="dark" data-favorites="true" data-info-panel="true" data-shortcuts-help="true" data-print="true" data-context-menu="true" id="gallery-favorites">
+            <a href="https://picsum.photos/id/240/1200/800" data-caption="Aurora over a frozen lake" data-tags="nature,winter" data-width="1200" data-height="800">
+                <img src="https://picsum.photos/id/240/400/267" alt="Aurora">
+            </a>
+            <a href="https://picsum.photos/id/241/1200/800" data-caption="Forest path at dusk" data-tags="nature,forest" data-width="1200" data-height="800">
+                <img src="https://picsum.photos/id/241/400/267" alt="Forest">
+            </a>
+            <a href="https://picsum.photos/id/242/1200/800" data-caption="Coastal cliffs" data-tags="nature,coast" data-width="1200" data-height="800">
+                <img src="https://picsum.photos/id/242/400/267" alt="Cliffs">
+            </a>
+            <a href="https://picsum.photos/id/243/1200/800" data-caption="Sand dunes at sunrise" data-tags="nature,desert" data-width="1200" data-height="800">
+                <img src="https://picsum.photos/id/243/400/267" alt="Dunes">
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        11. Image Editor + Annotation (v3.0.0)
        ================================================================ -->
-  <div class="section">
-    <h2>11. Image Editor &amp; Annotation</h2>
-    <p class="desc">Open lightbox and use the toolbar's edit (✎) button to rotate/flip, or annotate (✍) to draw on the image. Export as PNG.</p>
+    <div class="section">
+        <h2>11. Image Editor &amp; Annotation</h2>
+        <p class="desc">Open lightbox and use the toolbar's edit (✎) button to rotate/flip, or annotate (✍) to draw on the image. Export as PNG.</p>
 
-    <div data-neiki-gallery data-layout="grid" data-theme="dark"
-         data-editor="true" data-annotate="true" id="gallery-editor">
-      <a href="https://picsum.photos/id/250/1200/800" data-caption="Editable photo 1">
-        <img src="https://picsum.photos/id/250/400/267" alt="Photo 1">
-      </a>
-      <a href="https://picsum.photos/id/251/1200/800" data-caption="Editable photo 2">
-        <img src="https://picsum.photos/id/251/400/267" alt="Photo 2">
-      </a>
-      <a href="https://picsum.photos/id/252/1200/800" data-caption="Editable photo 3">
-        <img src="https://picsum.photos/id/252/400/267" alt="Photo 3">
-      </a>
+        <div data-neiki-gallery data-layout="grid" data-theme="dark" data-editor="true" data-annotate="true" id="gallery-editor">
+            <a href="https://picsum.photos/id/250/1200/800" data-caption="Editable photo 1">
+                <img src="https://picsum.photos/id/250/400/267" alt="Photo 1">
+            </a>
+            <a href="https://picsum.photos/id/251/1200/800" data-caption="Editable photo 2">
+                <img src="https://picsum.photos/id/251/400/267" alt="Photo 2">
+            </a>
+            <a href="https://picsum.photos/id/252/1200/800" data-caption="Editable photo 3">
+                <img src="https://picsum.photos/id/252/400/267" alt="Photo 3">
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        12. Album Groups (v3.0.0)
        ================================================================ -->
-  <div class="section">
-    <h2>12. Album Groups — Navigate Across Galleries</h2>
-    <p class="desc">Two galleries below share <code>data-group="vacation"</code>. Open either and use arrows to navigate seamlessly across both. Counter shows total group position.</p>
+    <div class="section">
+        <h2>12. Album Groups — Navigate Across Galleries</h2>
+        <p class="desc">Two galleries below share <code>data-group="vacation"</code>. Open either and use arrows to navigate seamlessly across both. Counter shows total group position.</p>
 
-    <div data-neiki-gallery data-layout="grid" data-theme="dark" data-group="vacation" id="gallery-album-1">
-      <a href="https://picsum.photos/id/260/1200/800" data-caption="Day 1 — Arrival">
-        <img src="https://picsum.photos/id/260/400/267" alt="Day 1">
-      </a>
-      <a href="https://picsum.photos/id/261/1200/800" data-caption="Day 2 — Beach">
-        <img src="https://picsum.photos/id/261/400/267" alt="Day 2">
-      </a>
-      <a href="https://picsum.photos/id/48/1200/800" data-caption="Day 3 — Mountains">
-        <img src="https://picsum.photos/id/48/400/267" alt="Day 3">
-      </a>
+        <div data-neiki-gallery data-layout="grid" data-theme="dark" data-group="vacation" id="gallery-album-1">
+            <a href="https://picsum.photos/id/260/1200/800" data-caption="Day 1 — Arrival">
+                <img src="https://picsum.photos/id/260/400/267" alt="Day 1">
+            </a>
+            <a href="https://picsum.photos/id/261/1200/800" data-caption="Day 2 — Beach">
+                <img src="https://picsum.photos/id/261/400/267" alt="Day 2">
+            </a>
+            <a href="https://picsum.photos/id/48/1200/800" data-caption="Day 3 — Mountains">
+                <img src="https://picsum.photos/id/48/400/267" alt="Day 3">
+            </a>
+        </div>
+
+        <div data-neiki-gallery data-layout="grid" data-theme="dark" data-group="vacation" id="gallery-album-2" style="margin-top:20px">
+            <a href="https://picsum.photos/id/263/1200/800" data-caption="Day 4 — Local market">
+                <img src="https://picsum.photos/id/263/400/267" alt="Day 4">
+            </a>
+            <a href="https://picsum.photos/id/264/1200/800" data-caption="Day 5 — Sunset">
+                <img src="https://picsum.photos/id/264/400/267" alt="Day 5">
+            </a>
+            <a href="https://picsum.photos/id/265/1200/800" data-caption="Day 6 — Departure">
+                <img src="https://picsum.photos/id/265/400/267" alt="Day 6">
+            </a>
+        </div>
     </div>
 
-    <div data-neiki-gallery data-layout="grid" data-theme="dark" data-group="vacation" id="gallery-album-2" style="margin-top:20px">
-      <a href="https://picsum.photos/id/263/1200/800" data-caption="Day 4 — Local market">
-        <img src="https://picsum.photos/id/263/400/267" alt="Day 4">
-      </a>
-      <a href="https://picsum.photos/id/264/1200/800" data-caption="Day 5 — Sunset">
-        <img src="https://picsum.photos/id/264/400/267" alt="Day 5">
-      </a>
-      <a href="https://picsum.photos/id/265/1200/800" data-caption="Day 6 — Departure">
-        <img src="https://picsum.photos/id/265/400/267" alt="Day 6">
-      </a>
-    </div>
-  </div>
-
-  <!-- ================================================================
+    <!-- ================================================================
        13. Plugin System Example (v3.0.0)
        ================================================================ -->
-  <div class="section">
-    <h2>13. Plugin System</h2>
-    <p class="desc">Custom plugins can hook into <code>init</code>, <code>open</code>, <code>change</code>, <code>close</code>, <code>destroy</code>. Example: a watermark plugin registered below adds a corner badge.</p>
+    <div class="section">
+        <h2>13. Plugin System</h2>
+        <p class="desc">Custom plugins can hook into <code>init</code>, <code>open</code>, <code>change</code>, <code>close</code>, <code>destroy</code>. Example: a watermark plugin registered below adds a corner badge.</p>
 
-    <div id="gallery-plugin">
-      <a href="https://picsum.photos/id/270/1200/800" data-caption="With watermark plugin">
-        <img src="https://picsum.photos/id/270/400/267" alt="">
-      </a>
-      <a href="https://picsum.photos/id/271/1200/800" data-caption="Plugin sees every change">
-        <img src="https://picsum.photos/id/271/400/267" alt="">
-      </a>
-      <a href="https://picsum.photos/id/272/1200/800" data-caption="© Neiki demo">
-        <img src="https://picsum.photos/id/272/400/267" alt="">
-      </a>
+        <div id="gallery-plugin">
+            <a href="https://picsum.photos/id/270/1200/800" data-caption="With watermark plugin">
+                <img src="https://picsum.photos/id/270/400/267" alt="">
+            </a>
+            <a href="https://picsum.photos/id/271/1200/800" data-caption="Plugin sees every change">
+                <img src="https://picsum.photos/id/271/400/267" alt="">
+            </a>
+            <a href="https://picsum.photos/id/272/1200/800" data-caption="© Neiki demo">
+                <img src="https://picsum.photos/id/272/400/267" alt="">
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- ================================================================
+    <!-- ================================================================
        Footer
        ================================================================ -->
-  <footer class="footer">
-    <p>Neiki's Gallery v3.0.0 &middot; Vanilla JS &middot; Zero Dependencies</p>
-  </footer>
+    <footer class="footer">
+        <p>Neiki's Gallery v3.0.0 &middot; Vanilla JS &middot; Zero Dependencies</p>
+    </footer>
 
-  <!-- ================================================================
+    <!-- ================================================================
        Scripts
        ================================================================ -->
-  <link rel="stylesheet" href="../src/neiki-gallery.css">
-  <script src="../src/neiki-gallery.js"></script>
-  <script>
-    // ============================================================
-    // v3.0.0 — Plugin example: watermark
-    // ============================================================
-    NeikiGallery.registerPlugin('watermark', function (gallery, options) {
-      var text = (options && options.text) || '© neiki';
-      var badge = null;
-      return {
-        init: function () {
-          badge = document.createElement('div');
-          badge.textContent = text;
-          badge.style.cssText = 'position:absolute;bottom:14px;right:14px;z-index:50;padding:6px 12px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;border-radius:8px;backdrop-filter:blur(8px);pointer-events:none;font-family:system-ui;';
-          gallery._lightbox.appendChild(badge);
-        },
-        open: function () { if (badge) badge.style.display = 'block'; },
-        close: function () { if (badge) badge.style.display = 'none'; },
-        destroy: function () { if (badge && badge.parentNode) badge.parentNode.removeChild(badge); }
-      };
-    });
+    <link rel="stylesheet" href="../src/neiki-gallery.css">
+    <script src="../src/neiki-gallery.js"></script>
+    <script>
+        // ============================================================
+        // v3.0.0 — Plugin example: watermark
+        // ============================================================
+        NeikiGallery.registerPlugin('watermark', function(gallery, options) {
+            var text = (options && options.text) || '© neiki';
+            var badge = null;
+            return {
+                init: function() {
+                    badge = document.createElement('div');
+                    badge.textContent = text;
+                    badge.style.cssText = 'position:absolute;bottom:14px;right:14px;z-index:50;padding:6px 12px;background:rgba(0,0,0,0.55);color:#fff;font-size:12px;border-radius:8px;backdrop-filter:blur(8px);pointer-events:none;font-family:system-ui;';
+                    gallery._lightbox.appendChild(badge);
+                },
+                open: function() {
+                    if (badge) badge.style.display = 'block';
+                },
+                close: function() {
+                    if (badge) badge.style.display = 'none';
+                },
+                destroy: function() {
+                    if (badge && badge.parentNode) badge.parentNode.removeChild(badge);
+                }
+            };
+        });
 
-    new NeikiGallery('#gallery-plugin', {
-      layout: 'grid',
-      theme: 'dark',
-      plugins: [{ name: 'watermark', text: '© neiki — plugin demo' }]
-    });
+        new NeikiGallery('#gallery-plugin', {
+            layout: 'grid',
+            theme: 'dark',
+            plugins: [{
+                name: 'watermark',
+                text: '© neiki — plugin demo'
+            }]
+        });
 
-    // Comparison slider
-    NeikiGallery.compare('#compare-demo', {
-      before: 'https://picsum.photos/id/100/800/500?grayscale',
-      after: 'https://picsum.photos/id/100/800/500',
-      labelBefore: 'Grayscale',
-      labelAfter: 'Color',
-      startPosition: 50
-    });
+        // Comparison slider
+        NeikiGallery.compare('#compare-demo', {
+            before: 'https://picsum.photos/id/100/800/500?grayscale',
+            after: 'https://picsum.photos/id/100/800/500',
+            labelBefore: 'Grayscale',
+            labelAfter: 'Color',
+            startPosition: 50
+        });
 
-    // Manual init for the API demo gallery
-    var apiGallery = new NeikiGallery('#gallery-api', {
-      layout: 'masonry',
-      loop: true,
-      thumbnails: true,
-      zoom: true,
-      contextualZoom: true,
-      fullscreen: true,
-      transition: 'fade',
-      theme: 'dark',
-      hashNavigation: true,
-      batchSelect: true,
-      share: true
-    });
+        // Manual init for the API demo gallery
+        var apiGallery = new NeikiGallery('#gallery-api', {
+            layout: 'masonry',
+            loop: true,
+            thumbnails: true,
+            zoom: true,
+            contextualZoom: true,
+            fullscreen: true,
+            transition: 'fade',
+            theme: 'dark',
+            hashNavigation: true,
+            batchSelect: true,
+            share: true
+        });
 
-    // Log events
-    var logEl = document.getElementById('events-log');
+        // Log events
+        var logEl = document.getElementById('events-log');
 
-    function log(msg) {
-      var line = document.createElement('div');
-      var time = new Date().toLocaleTimeString();
-      line.textContent = '[' + time + '] ' + msg;
-      logEl.appendChild(line);
-      logEl.scrollTop = logEl.scrollHeight;
-    }
+        function log(msg) {
+            var line = document.createElement('div');
+            var time = new Date().toLocaleTimeString();
+            line.textContent = '[' + time + '] ' + msg;
+            logEl.appendChild(line);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
 
-    apiGallery.on('open', function (index) {
-      log('open → image ' + (index + 1));
-    });
+        apiGallery.on('open', function(index) {
+            log('open → image ' + (index + 1));
+        });
 
-    apiGallery.on('close', function () {
-      log('close');
-    });
+        apiGallery.on('close', function() {
+            log('close');
+        });
 
-    apiGallery.on('change', function (index) {
-      log('change → image ' + (index + 1));
-    });
+        apiGallery.on('change', function(index) {
+            log('change → image ' + (index + 1));
+        });
 
-    apiGallery.on('slideshowStart', function () {
-      log('slideshow started');
-    });
+        apiGallery.on('slideshowStart', function() {
+            log('slideshow started');
+        });
 
-    apiGallery.on('slideshowStop', function () {
-      log('slideshow stopped');
-    });
+        apiGallery.on('slideshowStop', function() {
+            log('slideshow stopped');
+        });
 
-    apiGallery.on('select', function (indices) {
-      log('selected: [' + indices.join(', ') + ']');
-    });
-  </script>
+        apiGallery.on('select', function(indices) {
+            log('selected: [' + indices.join(', ') + ']');
+        });
+    </script>
 </body>
+
 </html>
