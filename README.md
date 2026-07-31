@@ -25,6 +25,18 @@
   <img src="https://img.shields.io/badge/Size-Lightweight-f97316?style=flat&labelColor=383C43" />
 </p>
 
+<p align="center">
+  ⭐ Enjoying Neiki's Gallery? Give it a Star and Fork the repository! ❤️<br>
+  Your support helps me see that the project is useful to developers<br>
+  and motivates me to keep improving it with more frequent updates.
+</p>
+
+<p align="center">
+  <a href="https://github.com/neikiri/neiki-gallery/fork">
+    <img src="https://img.shields.io/badge/Fork%20the%20project-2563EB?style=for-the-badge&logo=github&logoColor=white" alt="Fork the project">
+  </a>
+</p>
+
 
 <p align="center">
   <a href="https://sourceforge.net/projects/neiki-gallery/files/latest/download"><img alt="Download Neiki&#39;s Gallery" src="https://a.fsdn.com/con/app/sf-download-button" width=276 height=48 srcset="https://a.fsdn.com/con/app/sf-download-button?button_size=2x 2x"></a>
